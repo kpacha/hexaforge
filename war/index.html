@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Hexaforge</title>
+  </head>
+
+  <body>
+    <h1>Simulador interfaz hexaforge</h1>
+	
+    
+    <ul class="menu">
+    	<li><a href="hexagame">Hexaforge</a></li>
+    	<li><a href="hexagame?aid=new">New Battle</a></li>
+    	<li>
+    		<div><form action="/hexagame" method="get">
+    			<p>pid: <input tipe="text" name="pid" value="1"/></p>
+    			<p><button value="submit" value="submit" >enviar</button></p>
+			</form></div>
+		</li>
+    	<li>
+    		<div><form action="/hexagame" method="post">
+    			<p>pid: <input tipe="text" name="pid" value="1"/></p>
+    			<p>aid: <select name="aid"/>
+        				<option name="new" value="new">new</option>
+        				<option name="join" value="join">join</option>
+        				<option name="quit" value="quit">quit</option>
+        				<option name="start" value="start">start</option>
+    			</select></p>
+    			<p><button value="submit" value="submit" >enviar</button></p>
+			</form></div>
+		</li>
+    	<li><a href="tablero.html">Mapa</a></li>
+    </ul>
+  </body>
+</html>
