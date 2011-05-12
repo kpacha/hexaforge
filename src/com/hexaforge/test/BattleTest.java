@@ -9,12 +9,12 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import com.hexaforge.core.Battle;
+import com.hexaforge.core.Game;
 import com.hexaforge.util.PMF;
 
 public class BattleTest {
 
-	private Battle battle;
+	private Game battle;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -26,7 +26,7 @@ public class BattleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		battle = new Battle();
+		battle = new Game();
 	}
 
 	@After
@@ -39,7 +39,7 @@ public class BattleTest {
 		pm.close();
 
 		pm = PMF.get().getPersistenceManager();
-		Battle b = pm.getObjectById(Battle.class, battle.getKey());
+		Game b = pm.getObjectById(Game.class, battle.getKey());
 		pm.close();
 
 		assertTrue(b.equals(battle));

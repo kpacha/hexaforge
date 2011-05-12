@@ -1,8 +1,6 @@
 package com.hexaforge.servlet;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.zip.CRC32;
 
 import javax.jdo.PersistenceManager;
 import javax.servlet.http.*;
@@ -12,7 +10,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.hexaforge.core.Battle;
+import com.hexaforge.core.Game;
 import com.hexaforge.util.PMF;
 
 @SuppressWarnings("serial")
@@ -28,7 +26,7 @@ public class HexagameServlet extends HttpServlet {
 		if (pid == null && accion != null && accion.equalsIgnoreCase("new")) {
 			// System.out.print("creando partida\n"); // testing
 			PersistenceManager pm = PMF.get().getPersistenceManager();
-			Battle b = new Battle();
+			Game b = new Game();
 			resp.setContentType("text/plain");
 			resp.getWriter().println(
 					"Partida creada. Link invitación: " + b.getId());
@@ -40,11 +38,11 @@ public class HexagameServlet extends HttpServlet {
 		}
 		if (pid != null) {
 			// System.out.print("redireccionando post vacío\n"); // testing
-			Key k = KeyFactory.createKey(Battle.class.getSimpleName(), pid);
+			Key k = KeyFactory.createKey(Game.class.getSimpleName(), pid);
 			PersistenceManager pm = PMF.get().getPersistenceManager();
-			Battle battle;
+			Game battle;
 			try {
-				battle = pm.getObjectById(Battle.class, k);
+				battle = pm.getObjectById(Game.class, k);
 				// System.out.print("partida recuperada del datastore: "+pid+"\n");
 				// // testing
 				resp.setContentType("text/x-json");
@@ -80,11 +78,11 @@ public class HexagameServlet extends HttpServlet {
 			doGet(req, resp);
 			return;
 		}
-		Key k = KeyFactory.createKey(Battle.class.getSimpleName(), pid);
+		Key k = KeyFactory.createKey(Game.class.getSimpleName(), pid);
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Battle battle;
+		Game battle;
 		try {
-			battle = pm.getObjectById(Battle.class, k);
+			battle = pm.getObjectById(Game.class, k);
 			// System.out.print("partida recuperada del datastore: "+pid+"\n");
 			// // testing
 		} catch (Exception e) {
@@ -136,7 +134,7 @@ public class HexagameServlet extends HttpServlet {
 	}
 
 	private void publishJSONBoard(HttpServletRequest req,
-			HttpServletResponse resp, Battle b) throws IOException {
+			HttpServletResponse resp, Game b) throws IOException {
 		// String result =
 		// "{\"turno\":"+b.getTurn()+",\"jugadores\":"+b.getPlayers()+",\"tablero\":"+b.getBoard()+"}";
 		resp.getWriter()

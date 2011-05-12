@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import static com.google.appengine.api.taskqueue.TaskOptions.Builder.*;
-import com.hexaforge.core.Battle;
+import com.hexaforge.core.Game;
 import com.hexaforge.util.PMF;
 
 @SuppressWarnings("serial")
@@ -21,19 +21,19 @@ public class TurnChecker extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Query query = pm.newQuery(Battle.class);
+		Query query = pm.newQuery(Game.class);
 		query.setFilter("state == 3 && nextCheck <= nextCheckParam");
 		query.setOrdering("nextCheck asc");
 		query.declareParameters("long nextCheckParam");
 		long now = (new Date()).getTime();
 
-		List<Battle> results = (List<Battle>) query.execute(now);
+		List<Game> results = (List<Game>) query.execute(now);
 		try {
 			if (results.iterator().hasNext()) {
 				// System.out.print("Resultados obtenidos!. Total: "+results.size()+"\n");
 				// // testing
 				// System.out.print("Resultados obtenidos!.\n"); // testing
-				for (Battle b : results) {
+				for (Game b : results) {
 					if (now - b.getChecked() >= 0) {
 						Queue queue = QueueFactory.getDefaultQueue();
 						queue.add(withUrl("/worker/return").param("id",
