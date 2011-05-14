@@ -59,8 +59,8 @@ public class Player {
 	}
 
 	public String toString() {
-		// System.out.print("maquetando: ['"+id+"','"+name+"','"+color+"','"+turns+"']\n");
-		return "['" + id + "','" + name + "','" + color + "','" + turns + "']";
+		// System.out.print("maquetando: [\"" + id + "\",\"" + name + "\",\"" + color + "\",\"" + turns + "\"]\n");
+		return "[\"" + id + "\",\"" + name + "\",\"" + color + "\",\"" + turns + "\"]";
 	}
 
 	public void fromArray(String[] s) {

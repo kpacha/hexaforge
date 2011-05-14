@@ -134,13 +134,13 @@ public class HexagameServlet extends HttpServlet {
 	}
 
 	private void publishJSONBoard(HttpServletRequest req,
-			HttpServletResponse resp, Game b) throws IOException {
+			HttpServletResponse resp, Game g) throws IOException {
 		// String result =
 		// "{\"turno\":"+b.getTurn()+",\"jugadores\":"+b.getPlayers()+",\"tablero\":"+b.getBoard()+"}";
 		resp.getWriter()
 				.println(
-						"{\"turno\":" + b.getTurn() + ",\"jugadores\":"
-								+ b.getPlayers() + ",\"tablero\":"
-								+ b.getBoard() + "}");
+						"{\"turno\":" + g.getTurn() + ",\"jugadores\":"
+								+ g.getPlayers() + ",\"tablero\":"
+								+ g.getBoard() + "}");
 	}
 }
