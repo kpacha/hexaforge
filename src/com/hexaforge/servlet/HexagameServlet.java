@@ -26,12 +26,12 @@ public class HexagameServlet extends HttpServlet {
 		if (pid == null && accion != null && accion.equalsIgnoreCase("new")) {
 			// System.out.print("creando partida\n"); // testing
 			PersistenceManager pm = PMF.get().getPersistenceManager();
-			Game b = new Game();
+			Game g = new Game();
 			resp.setContentType("text/plain");
 			resp.getWriter().println(
-					"Partida creada. Link invitación: " + b.getId());
-			if (b.addPlayer(user.getUserId(), user.getNickname(), 0)) {
-				pm.makePersistent(b);
+					"Partida creada. Link invitación: " + g.getId());
+			if (g.addPlayer(user.getUserId(), user.getNickname(), 0)) {
+				pm.makePersistent(g);
 			}
 			pm.close();
 			return;
