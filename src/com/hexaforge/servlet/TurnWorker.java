@@ -33,26 +33,26 @@ public class TurnWorker extends HttpServlet {
 		}
 		Key k = KeyFactory.createKey(Game.class.getSimpleName(), id);
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game battle;
+		Game game;
 		try {
-			battle = pm.getObjectById(Game.class, k);
+			game = pm.getObjectById(Game.class, k);
 		} catch (Exception e) {
 			log.warning("TurnWorker datastore reader error!");
 			return;
 		}
 		long now = (new Date()).getTime();
-		if (now < battle.getChecked()) {
-			log.warning("TurnWorker error: " + (battle.getChecked() - now) + "ms. in advance!");
+		if (now < game.getChecked()) {
+			log.warning("TurnWorker error: " + (game.getChecked() - now) + "ms. in advance!");
 			return;
 		}
-		if (battle.addTurns(Game.DELTA_TURN)) {
-			battle.setChecked(battle.getChecked() + Game.ETA_TURN);
+		if (game.addTurns(Game.DELTA_TURN)) {
+			game.setChecked(game.getChecked() + Game.ETA_TURN);
 		} else {
 			log.warning("TurnWorker unknown error!");
 			return;
 		}
 		try {
-			pm.makePersistent(battle);
+			pm.makePersistent(game);
 		} catch (Exception e) {
 			log.warning("TurnWorker datastore writer error!");
 			return;
