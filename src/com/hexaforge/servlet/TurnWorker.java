@@ -2,6 +2,7 @@ package com.hexaforge.servlet;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
 import javax.servlet.http.HttpServlet;
@@ -15,6 +16,9 @@ import com.hexaforge.util.PMF;
 
 @SuppressWarnings("serial")
 public class TurnWorker extends HttpServlet {
+	
+	private static final Logger log =
+	    Logger.getLogger(TurnWorker.class.getName());
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
@@ -27,38 +31,32 @@ public class TurnWorker extends HttpServlet {
 		if (id == null) {
 			return;
 		}
-		// System.out.print("Consumiendo "+id+" de la queue.\n"); // testing
 		Key k = KeyFactory.createKey(Game.class.getSimpleName(), id);
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Game battle;
 		try {
 			battle = pm.getObjectById(Game.class, k);
 		} catch (Exception e) {
-			// System.out.print("error recuperando partida del datastore: "+id+"\n");
-			// // testing
+			log.warning("TurnWorker datastore reader error!");
 			return;
 		}
-		if (((new Date()).getTime() - battle.getChecked()) < 0) {
-			// System.out.print("Worker llamado innecesariamente para el id:"+id+"\n");
-			// // testing
+		long now = (new Date()).getTime();
+		if (now < battle.getChecked()) {
+			log.warning("TurnWorker error: " + (battle.getChecked() - now) + "ms. in advance!");
 			return;
 		}
 		if (battle.addTurns(Game.DELTA_TURN)) {
-			battle.setChecked((new Date()).getTime() + Game.ETA_TURN);
+			battle.setChecked(battle.getChecked() + Game.ETA_TURN);
 		} else {
-			// System.out.print("error incrementando los turnos de: "+id+"\n");
-			// // testing
+			log.warning("TurnWorker unknown error!");
 			return;
 		}
 		try {
 			pm.makePersistent(battle);
 		} catch (Exception e) {
-			// System.out.print("error recuperando partida del datastore: "+id+"\n");
-			// // testing
+			log.warning("TurnWorker datastore writer error!");
 			return;
 		}
 		pm.close();
-		// System.out.print("Consumido "+battle.getId()+" de la queue.\n"); //
-		// testing
 	}
 }

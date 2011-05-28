@@ -3,6 +3,7 @@ package com.hexaforge.servlet;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
@@ -18,6 +19,10 @@ import com.hexaforge.util.PMF;
 
 @SuppressWarnings("serial")
 public class TurnChecker extends HttpServlet {
+	
+	private static final Logger log =
+	    Logger.getLogger(TurnChecker.class.getName());
+	
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -26,38 +31,30 @@ public class TurnChecker extends HttpServlet {
 		query.setOrdering("nextCheck asc");
 		query.declareParameters("long nextCheckParam");
 		long now = (new Date()).getTime();
+		
+		log.warning("TurnChecker started at " + now);
 
 		List<Game> results = (List<Game>) query.execute(now);
 		try {
 			if (results.iterator().hasNext()) {
-				// System.out.print("Resultados obtenidos!. Total: "+results.size()+"\n");
-				// // testing
-				// System.out.print("Resultados obtenidos!.\n"); // testing
 				for (Game b : results) {
+					log.info("Checking game --- Now: " + now + ". Next check: " + b.getChecked() + ". Diff: " + (now - b.getChecked()) + "\n");
 					if (now - b.getChecked() >= 0) {
 						Queue queue = QueueFactory.getDefaultQueue();
 						queue.add(withUrl("/worker/return").param("id",
 								b.getId()));
-						// System.out.print("Añadido "+b.getId()+" en la queue.\n");
-						// // testing
-						// System.out.print("nextCheck "+b.getChecked()+" ("+(now-b.getChecked())+").\n");
-						// // testing
+						log.info("Message enqueued: /worker/return with id: " + b.getId());
 					} else {
-						// System.out.print("Resultado indeseado! nextCheck "+b.getChecked()+" ("+(now-b.getChecked())+").\n");
-						// // testing
+						log.warning("Bad result! nextCheck "+b.getChecked()+" ("+(now-b.getChecked())+").");
 					}
 				}
 			} else {
-				// System.out.print("Tarea programada: no hay resultados.\n");
-				// // testing
+				log.info("No results.");
 			}
 		} catch (Exception e) {
-			// System.out.print("Error en la tarea programada: "+e.getMessage()+".\n");
-			// // testing
+			log.warning(e.getMessage());
 		} finally {
 			query.closeAll();
-			// System.out.print("Umbral: "+(new Date()).getTime()+".\n"); //
-			// testing
 		}
 	}
 
