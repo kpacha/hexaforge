@@ -38,14 +38,14 @@ public class TurnChecker extends HttpServlet {
 		try {
 			if (results.iterator().hasNext()) {
 				for (Game game : results) {
-					log.info("Checking game --- Now: " + now + ". Next check: " + game.getChecked() + ". Diff: " + (now - game.getChecked()) + "\n");
-					if (now - game.getChecked() >= 0) {
+					log.info("Checking game --- Now: " + now + ". Next check: " + game.getNextCheck() + ". Diff: " + (now - game.getNextCheck()) + "\n");
+					if (now - game.getNextCheck() >= 0) {
 						Queue queue = QueueFactory.getDefaultQueue();
 						queue.add(withUrl("/worker/return").param("id",
 								game.getId()));
 						log.info("Message enqueued: /worker/return with id: " + game.getId());
 					} else {
-						log.warning("Bad result! nextCheck "+game.getChecked()+" ("+(now-game.getChecked())+").");
+						log.warning("Bad result! nextCheck "+game.getNextCheck()+" ("+(now-game.getNextCheck())+").");
 					}
 				}
 			} else {

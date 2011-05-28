@@ -144,7 +144,7 @@ public class Game {
 		updated = u;
 	}
 
-	public void setChecked(long c) {
+	public void setNextCheck(long c) {
 		nextCheck = c;
 	}
 
@@ -184,7 +184,7 @@ public class Game {
 		return updated;
 	}
 
-	public long getChecked() {
+	public long getNextCheck() {
 		return nextCheck;
 	}
 

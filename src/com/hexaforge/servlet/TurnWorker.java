@@ -41,12 +41,12 @@ public class TurnWorker extends HttpServlet {
 			return;
 		}
 		long now = (new Date()).getTime();
-		if (now < game.getChecked()) {
-			log.warning("TurnWorker error: " + (game.getChecked() - now) + "ms. in advance!");
+		if (now < game.getNextCheck()) {
+			log.warning("TurnWorker error: " + (game.getNextCheck() - now) + "ms. in advance!");
 			return;
 		}
 		if (game.addTurns(Game.DELTA_TURN)) {
-			game.setChecked(game.getChecked() + Game.ETA_TURN);
+			game.setNextCheck(game.getNextCheck() + Game.ETA_TURN);
 		} else {
 			log.warning("TurnWorker unknown error!");
 			return;
