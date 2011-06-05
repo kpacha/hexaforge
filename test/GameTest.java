@@ -2,7 +2,7 @@ package com.hexaforge.test;
 
 import javax.jdo.PersistenceManager;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -12,9 +12,9 @@ import org.junit.BeforeClass;
 import com.hexaforge.core.Game;
 import com.hexaforge.util.PMF;
 
-public class BattleTest {
+public class GameTest {
 
-	private Game battle;
+	private Game game;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -26,7 +26,7 @@ public class BattleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		battle = new Game();
+		game = new Game();
 	}
 
 	@After
@@ -35,20 +35,21 @@ public class BattleTest {
 
 	public void testGuardado() {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		pm.makePersistent(battle);
+		pm.makePersistent(game);
 		pm.close();
 
 		pm = PMF.get().getPersistenceManager();
-		Game b = pm.getObjectById(Game.class, battle.getKey());
+		Game b = pm.getObjectById(Game.class, game.getKey());
 		pm.close();
 
-		assertTrue(b.equals(battle));
+		assertTrue(b.equals(game));
 	}
-
+/*
 	public void revisaParseoJugadores() {
 		String jugadorId = "00000";
 		String jugadorName = "name";
-		battle.addPlayer(jugadorId, jugadorName);
-		String players = battle.getPlayers();
+		game.addPlayer(jugadorId, jugadorName);
+		String players = game.getPlayers();
 	}
+*/
 }
