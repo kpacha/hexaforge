@@ -24,7 +24,7 @@ public class HexagameServlet extends HttpServlet {
 		String accion = req.getParameter("aid");
 		String pid = req.getParameter("pid");
 		if (pid == null && accion != null && accion.equalsIgnoreCase("new")) {
-			// System.out.print("creando partida\n"); // testing
+			// System.out.print("creando partida\n");
 			PersistenceManager pm = PMF.get().getPersistenceManager();
 			Game g = new Game();
 			resp.setContentType("text/plain");
@@ -37,20 +37,18 @@ public class HexagameServlet extends HttpServlet {
 			return;
 		}
 		if (pid != null) {
-			// System.out.print("redireccionando post vacío\n"); // testing
+			// System.out.print("redireccionando post vacío\n");
 			Key k = KeyFactory.createKey(Game.class.getSimpleName(), pid);
 			PersistenceManager pm = PMF.get().getPersistenceManager();
 			Game battle;
 			try {
 				battle = pm.getObjectById(Game.class, k);
 				// System.out.print("partida recuperada del datastore: "+pid+"\n");
-				// // testing
 				resp.setContentType("text/x-json");
 				publishJSONBoard(req, resp, battle);
 				return;
 			} catch (Exception e) {
 				// System.out.print("error recuperando partida del datastore: "+pid+"\n");
-				// // testing
 				return;
 			}
 		}
@@ -67,14 +65,13 @@ public class HexagameServlet extends HttpServlet {
 		resp.setContentType("text/x-json");
 		String accion = req.getParameter("aid");
 		if (accion == null) {
-			// System.out.print("redireccionando petición incompleta\n"); //
-			// testing
+			// System.out.print("redireccionando petición incompleta\n"); 
 			doGet(req, resp);
 			return;
 		}
 		String pid = req.getParameter("pid");
 		if (pid == null && accion.equalsIgnoreCase("new")) {
-			// System.out.print("redireccionando post vacío\n"); // testing
+			// System.out.print("redireccionando post vacío\n");
 			doGet(req, resp);
 			return;
 		}
@@ -84,14 +81,12 @@ public class HexagameServlet extends HttpServlet {
 		try {
 			battle = pm.getObjectById(Game.class, k);
 			// System.out.print("partida recuperada del datastore: "+pid+"\n");
-			// // testing
 		} catch (Exception e) {
 			// System.out.print("error recuperando partida del datastore: "+pid+"\n");
-			// // testing
 			return;
 		}
 		// System.out.print("Gestión de la acción <" +accion+
-		// "> para la partida " +pid+"\n"); // testing
+		// "> para la partida " +pid+"\n");
 		if (accion.equalsIgnoreCase("join")) {
 			if (battle.addPlayer(user.getUserId(), user.getNickname())) {
 				pm.makePersistent(battle);

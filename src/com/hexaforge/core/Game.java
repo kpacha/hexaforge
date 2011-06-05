@@ -55,19 +55,14 @@ public class Game {
 	@NotPersistent
 	public final static int DELTA_TURN = 1; // turnos a incrementar
 	@NotPersistent
-	public final static int ETA_TURN = 6 * 60 * 60 * 1000; // segundos hasta la
-															// siguiente
-															// actualización de
-															// turnos. 6h en
-															// milisegundos
+	public final static int ETA_TURN = 6 * 60 * 60 * 1000;
+	// segundos hasta la siguiente actualización de turnos. 6h en  milisegundos
 	@NotPersistent
-	public final static int STATE_NEW_GAME = 0; // creando el juego. se deberán
-												// establecer los parámetos de
-												// la partida
+	public final static int STATE_NEW_GAME = 0;
+	// creando el juego. se deberán establecer los parámetos de la partida
 	@NotPersistent
-	public final static int STATE_JOIN_GAME = 1; // esperando a que se unan los
-													// jugadores mínimos
-													// necesarios
+	public final static int STATE_JOIN_GAME = 1;
+	// esperando a que se unan los jugadores mínimos necesarios
 	@NotPersistent
 	public final static int STATE_PREPARE_GAME = 2; // preparando la partida
 	@NotPersistent
@@ -230,13 +225,9 @@ public class Game {
 				state = STATE_JOIN_GAME;
 			setPlayers(players2Txt(pV));
 			// System.out.print("-----------------------------------------------\n");
-			// // testing
 			// System.out.print("Player added. totPlayers: " +totPlayers+ "\n");
-			// // testing
-			// System.out.print("Player added. players: " +players+ "\n"); //
-			// testing
+			// System.out.print("Player added. players: " +players+ "\n"); 
 			// System.out.print("-----------------------------------------------\n");
-			// // testing
 			return true;
 		} else
 			return false;
@@ -312,10 +303,8 @@ public class Game {
 	 */
 	public boolean startGame() {
 		// System.out.print("-----------------------------------------------\n");
-		// // testing
 		// System.out.print("Iniciando juego con " +totPlayers+ " jugadores\n");
-		// // testing
-		// System.out.print("estado inicial : " +state+ "\n"); // testing
+		// System.out.print("estado inicial : " +state+ "\n");
 		if (state == STATE_PREPARE_GAME && totPlayers != 0) {
 			// creamos tablero
 			Board b = new Board(MAX_CELLS);
@@ -335,9 +324,8 @@ public class Game {
 			nextCheck = created + ETA_TURN;
 			state = STATE_PLAYING;
 		}
-		// System.out.print("estado final : " +state+ "\n"); // testing
+		// System.out.print("estado final : " +state+ "\n"); 
 		// System.out.print("-----------------------------------------------\n");
-		// // testing
 		return state == STATE_PLAYING;
 	}
 
@@ -353,11 +341,11 @@ public class Game {
 	public boolean addTurns(int t) {
 		Vector<Player> pV = txt2Players(players);
 		// System.out.print("addTurns(t) pre:-> t=" +t+
-		// ". Total: "+pV.size()+"/"+totPlayers+"\n"); // testing
+		// ". Total: "+pV.size()+"/"+totPlayers+"\n");
 		for (int i = 0; i < totPlayers; i++) {
 			pV.get(i).addTurns(t);
-			System.out.print("addTurns(" + t + "). " + pV.get(i).getName()
-					+ ". Total turnos: " + pV.get(i).getTurns() + "\n"); // testing
+			//System.out.print("addTurns(" + t + "). " + pV.get(i).getName()
+			//		+ ". Total turnos: " + pV.get(i).getTurns() + "\n");
 		}
 		setPlayers(players2Txt(pV));
 		// System.out.print("addTurns(t) post:-> t=" +t+

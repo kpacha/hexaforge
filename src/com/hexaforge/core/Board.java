@@ -64,8 +64,7 @@ public class Board {
 			}
 		}
 		result += "]";
-		// System.out.print("Board: serializeCells() : " +result+ "\n"); //
-		// testing
+		// System.out.print("Board: serializeCells() : " +result+ "\n"); 
 		return result;
 	}
 
