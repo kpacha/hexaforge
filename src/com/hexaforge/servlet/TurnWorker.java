@@ -16,9 +16,9 @@ import com.hexaforge.util.PMF;
 
 @SuppressWarnings("serial")
 public class TurnWorker extends HttpServlet {
-	
-	private static final Logger log =
-	    Logger.getLogger(TurnWorker.class.getName());
+
+	private static final Logger log = Logger.getLogger(TurnWorker.class
+			.getName());
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
@@ -42,7 +42,8 @@ public class TurnWorker extends HttpServlet {
 		}
 		long now = (new Date()).getTime();
 		if (now < game.getNextCheck()) {
-			log.warning("TurnWorker error: " + (game.getNextCheck() - now) + "ms. in advance!");
+			log.warning("TurnWorker error: " + (game.getNextCheck() - now)
+					+ "ms. in advance!");
 			return;
 		}
 		if (game.addTurns(Game.DELTA_TURN)) {

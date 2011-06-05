@@ -33,8 +33,10 @@ public class Hexagon {
 	}
 
 	public String toString() {
-		// System.out.print("Hexagon: maquetando: [\"" + x + "\",\"" + y + "\",\"" + contenido + "\",\"" + propietario + "\"]\n");
-		return "[\"" + x + "\",\"" + y + "\",\"" + contenido + "\",\"" + propietario + "\"]";
+		// System.out.print("Hexagon: maquetando: [\"" + x + "\",\"" + y +
+		// "\",\"" + contenido + "\",\"" + propietario + "\"]\n");
+		return "[\"" + x + "\",\"" + y + "\",\"" + contenido + "\",\""
+				+ propietario + "\"]";
 	}
 
 	public int getX() {

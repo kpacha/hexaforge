@@ -19,10 +19,10 @@ import com.hexaforge.util.PMF;
 
 @SuppressWarnings("serial")
 public class TurnChecker extends HttpServlet {
-	
-	private static final Logger log =
-	    Logger.getLogger(TurnChecker.class.getName());
-	
+
+	private static final Logger log = Logger.getLogger(TurnChecker.class
+			.getName());
+
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
@@ -31,21 +31,26 @@ public class TurnChecker extends HttpServlet {
 		query.setOrdering("nextCheck asc");
 		query.declareParameters("long nextCheckParam");
 		long now = (new Date()).getTime();
-		
+
 		log.warning("TurnChecker started at " + now);
 
 		List<Game> results = (List<Game>) query.execute(now);
 		try {
 			if (results.iterator().hasNext()) {
 				for (Game game : results) {
-					log.info("Checking game --- Now: " + now + ". Next check: " + game.getNextCheck() + ". Diff: " + (now - game.getNextCheck()) + "\n");
+					log.info("Checking game --- Now: " + now + ". Next check: "
+							+ game.getNextCheck() + ". Diff: "
+							+ (now - game.getNextCheck()) + "\n");
 					if (now - game.getNextCheck() >= 0) {
 						Queue queue = QueueFactory.getDefaultQueue();
 						queue.add(withUrl("/worker/return").param("id",
 								game.getId()));
-						log.info("Message enqueued: /worker/return with id: " + game.getId());
+						log.info("Message enqueued: /worker/return with id: "
+								+ game.getId());
 					} else {
-						log.warning("Bad result! nextCheck "+game.getNextCheck()+" ("+(now-game.getNextCheck())+").");
+						log.warning("Bad result! nextCheck "
+								+ game.getNextCheck() + " ("
+								+ (now - game.getNextCheck()) + ").");
 					}
 				}
 			} else {
