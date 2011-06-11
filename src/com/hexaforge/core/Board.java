@@ -13,14 +13,14 @@ public class Board {
 		// [[20,20],[[0,0,"p",0],[0,1,"s",0],[19,19,"l",2]]]
 		b = (String) b.subSequence(1, b.length() - 1);
 		// [20,20],[[0,0,"p",0],[0,1,"s",0],[19,19,"l",2]]
-		String[] p = b.split("\\],\\[");
+		String[] p = b.split("\\],\\[\\[");
 		// p[0]=[20,20
 		p[0] = (String) p[0].subSequence(1, p[0].length());
 		String[] max = p[0].split(",");
 		maxX = Integer.valueOf(max[0]);
 		maxY = Integer.valueOf(max[1]);
-		// p[1]=[0,0,"p",0],[0,1,"s",0],[19,19,"l",2]]
-		p[1] = (String) p[1].subSequence(0, p[1].length() - 1);
+		// p[1]=0,0,"p",0],[0,1,"s",0],[19,19,"l",2]]
+		p[1] = "[" + (String) p[1].subSequence(0, p[1].length() - 1);
 		// p[1]=[0,0,"p",0],[0,1,"s",0],[19,19,"l",2]
 		String[] cells = p[1].split("\\],\\[");
 		totHexagon = cells.length;
