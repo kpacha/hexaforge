@@ -30,7 +30,7 @@ public class HexagameServlet extends HttpServlet {
 		}
 		if (pid != null && accion != null && accion.equalsIgnoreCase("join")) {
 			// System.out.print("uniendo a la partida");
-			doGet(req, resp);
+			doPost(req, resp);
 			return;			
 		}
 		if (pid != null) {
@@ -68,6 +68,7 @@ public class HexagameServlet extends HttpServlet {
 			// System.out.print("partida recuperada del datastore: "+pid+"\n");
 		} catch (Exception e) {
 			// System.out.print("error recuperando partida del datastore: "+pid+"\n");
+			doGet(req, resp);
 			return;
 		}
 		// System.out.print("Gestión de la acción <" +accion+
@@ -90,7 +91,7 @@ public class HexagameServlet extends HttpServlet {
 		} else if (accion.equalsIgnoreCase("move")) {
 			String movementString = req.getParameter("m");
 			if (movementString == null) {
-				publishJSONBoard(req, resp, game);
+				resp.getWriter().println(game.toString());
 				return;
 			}
 			if (game.move(movementString)) {
@@ -98,7 +99,7 @@ public class HexagameServlet extends HttpServlet {
 			}
 		}
 		pm.close();
-		publishJSONBoard(req, resp, game);
+		resp.getWriter().println(game.toString());
 	}
 
 	private User checkUser(HttpServletRequest req, HttpServletResponse resp)
@@ -111,15 +112,6 @@ public class HexagameServlet extends HttpServlet {
 							+ "\">sign in</a>.</p>");
 		}
 		return user;
-	}
-
-	private void publishJSONBoard(HttpServletRequest req,
-			HttpServletResponse resp, Game g) throws IOException {
-		resp.getWriter()
-				.println(
-						"{\"turno\":\"" + g.getTurn() + "\", \"jugadores\":"
-								+ g.getPlayers() + ", \"tablero\":"
-								+ g.getBoard() + "}");
 	}
 	
 	private void newGame(HttpServletRequest req, HttpServletResponse resp, User user)
@@ -159,7 +151,7 @@ public class HexagameServlet extends HttpServlet {
 			game = pm.getObjectById(Game.class, k);
 			// System.out.print("partida recuperada del datastore: "+pid+"\n");
 			resp.setContentType("text/x-json");
-			publishJSONBoard(req, resp, game);
+			resp.getWriter().println(game.toString());
 			return;
 		} catch (Exception e) {
 			// System.out.print("error recuperando partida del datastore: "+pid+"\n");

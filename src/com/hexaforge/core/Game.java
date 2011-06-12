@@ -134,7 +134,7 @@ public class Game {
 
 	public void setPlayers(String j) {
 		players = j;
-		totPlayers = j.split("\\},\\{").length;
+		totPlayers = j.split("\\}, \\{").length;
 		// System.out.print("Seteando jugadores desde String: "+j+"\n");
 	}
 
@@ -226,8 +226,8 @@ public class Game {
 		if (totPlayers != 0) {
 			pV = txt2Players(players);
 			if (pV.size() != totPlayers) {
-				 System.out.print("Los totales no coinciden: " +totPlayers+
-				 ", " +pV.size()+ "\n"); // testing
+				 //System.out.print("Los totales no coinciden: " +totPlayers+
+				 //", " +pV.size()+ "\n"); // testing
 				return false;
 			}
 		}
@@ -388,5 +388,11 @@ public class Game {
 
 	private int rnd(int max) {
 		return generator.nextInt(max);
+	}
+	
+	public String toString(){
+		return "{\"turno\":\"" + this.getTurn() + "\", \"jugadores\":"
+			+ this.getPlayers() + ", \"tablero\":"
+			+ this.getBoard() + "}";
 	}
 }
