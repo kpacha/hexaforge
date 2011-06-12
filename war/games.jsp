@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.text.DateFormat" %>
+<%@ page import="java.util.Date" %>
 <%@ page import="java.util.List" %>
 <%@ page import="javax.jdo.PersistenceManager" %>
 <%@ page import="com.google.appengine.api.users.User" %>
@@ -31,7 +32,7 @@ return;
 
 <%
 PersistenceManager pm = PMF.get().getPersistenceManager();
-String query = "select from " + Game.class.getName() + " order by created desc range 0,10";
+String query = "select from " + Game.class.getName() + " order by nextCheck asc range 0,10";
 List<Game> games = (List<Game>) pm.newQuery(query).execute();
 if (games.isEmpty()) {
 %>
@@ -39,6 +40,7 @@ if (games.isEmpty()) {
 <%
 } else {
 %>
+<h4>Actualizado: <%= DateFormat.getDateTimeInstance().format((new Date()).getTime()) %> (GMT)</h4>
 <ul>
 <%
 for (Game g : games) {
@@ -65,7 +67,8 @@ if(g.getId() != null){
 		} else if (!g.isFinished()) {
 		%>
 		<li>Proximo incremento de turnos: <%= DateFormat.getDateTimeInstance().format(g.getNextCheck()) %> (GMT)</li>
-		<li>Turnos a incrementar: <%= g.getGamePreferences().getDeltaTrun() %></li>
+		<li>Turnos a incrementar: <%= g.getGamePreferences().getDeltaTurn() %></li>
+		<li>Frecuendia incrementos: cada <%= g.getGamePreferences().getEtaTurn()/60000 %> minuto(s) [<%= g.getGamePreferences().getEtaTurn()/1000 %> segundo(s)]</li>
 		<%
 		} else {
 		%>

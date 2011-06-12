@@ -139,7 +139,7 @@ public class HexagameServlet extends HttpServlet {
 			throws IOException {
 		String i, d, e;
 		i = req.getParameter("initialDeltaTurn");
-		d = req.getParameter("deltaTrun");
+		d = req.getParameter("deltaTurn");
 		e = req.getParameter("etaTurn");
 		if(i != null && d != null && e != null){
 			PersistenceManager pm = PMF.get().getPersistenceManager();

@@ -20,7 +20,7 @@ GamePreferences p = new GamePreferences();
 
 <form action="/hexagame" method="post">
 <div>initialDeltaTurn:<input type="text" name="initialDeltaTurn" value="<%= p.getInitialDeltaTurn() %>"></input></div>
-<div>deltaTrun:<input type="text" name="deltaTrun" value="<%= p.getDeltaTrun() %>"></input></div>
+<div>deltaTurn:<input type="text" name="deltaTurn" value="<%= p.getDeltaTurn() %>"></input></div>
 <div>etaTurn:<input type="text" name="etaTurn" value="<%= p.getEtaTurn() %>"></input></div>
 <div><input type="submit" value="Create Game!" />
 <input type="hidden" name="aid" value="new"></div>

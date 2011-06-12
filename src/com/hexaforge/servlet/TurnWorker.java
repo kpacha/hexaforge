@@ -46,7 +46,7 @@ public class TurnWorker extends HttpServlet {
 					+ "ms. in advance!");
 			return;
 		}
-		if (game.addTurns(game.getGamePreferences().getDeltaTrun())) {
+		if (game.addTurns(game.getGamePreferences().getDeltaTurn())) {
 			game.setNextCheck(game.getNextCheck() + game.getGamePreferences().getEtaTurn());
 		} else {
 			log.warning("TurnWorker unknown error!");
