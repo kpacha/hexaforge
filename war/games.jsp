@@ -67,8 +67,7 @@ if(g.getId() != null){
 		} else if (!g.isFinished()) {
 		%>
 		<li>Proximo incremento de turnos: <%= DateFormat.getDateTimeInstance().format(g.getNextCheck()) %> (GMT)</li>
-		<li>Turnos a incrementar: <%= g.getGamePreferences().getDeltaTurn() %></li>
-		<li>Frecuendia incrementos: cada <%= g.getGamePreferences().getEtaTurn()/60000 %> minuto(s) [<%= g.getGamePreferences().getEtaTurn()/1000 %> segundo(s)]</li>
+		<li>Turnos a incrementar: <%= g.getGamePreferences().getDeltaTurn() %> cada <%= g.getGamePreferences().getEtaTurn()/60000 %> minuto(s) [<%= g.getGamePreferences().getEtaTurn()/1000 %> segundo(s)]</li>
 		<%
 		} else {
 		%>
