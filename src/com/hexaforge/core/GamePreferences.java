@@ -14,10 +14,30 @@ public class GamePreferences {
 	private int deltaTrun;
 	private int etaTurn;
 	
+	public GamePreferences(int initialDeltaTurn, int deltaTrun, int etaTurn) {
+		super();
+		this.initialDeltaTurn = initialDeltaTurn;
+		this.deltaTrun = deltaTrun;
+		this.etaTurn = etaTurn;
+	}
+
 	public GamePreferences(){
 		initialDeltaTurn = INITIAL_DELTA_TURN;
 		deltaTrun = DELTA_TURN;
 		etaTurn = ETA_TURN;
+	}
+	
+	public GamePreferences(String s){
+		s = (String) s.subSequence(1, s.length() - 1);
+		String[] preferences = s.split(",");
+		initialDeltaTurn = extractValue(preferences[0]);
+		deltaTrun = extractValue(preferences[1]);
+		etaTurn = extractValue(preferences[2]);
+	}
+	
+	private int extractValue(String v){
+		v = v.split(":")[1];
+		return Integer.valueOf((String) v.subSequence(1, v.length() - 1));
 	}
 
 	/**
@@ -69,8 +89,8 @@ public class GamePreferences {
 	@Override
 	public String toString() {
 		return "[\"initialDeltaTurn\":\"" + initialDeltaTurn
-				+ "\", deltaTrun\":\"" + deltaTrun + "\", etaTurn\":\""
-				+ etaTurn + "]";
+				+ "\", \"deltaTrun\":\"" + deltaTrun + "\", \"etaTurn\":\""
+				+ etaTurn + "\"]";
 	}
 
 }

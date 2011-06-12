@@ -11,6 +11,7 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.hexaforge.core.Game;
+import com.hexaforge.core.GamePreferences;
 import com.hexaforge.util.PMF;
 
 @SuppressWarnings("serial")
@@ -24,20 +25,16 @@ public class HexagameServlet extends HttpServlet {
 		String accion = req.getParameter("aid");
 		String pid = req.getParameter("pid");
 		if (pid == null && accion != null && accion.equalsIgnoreCase("new")) {
-			// System.out.print("creando partida\n");
-			PersistenceManager pm = PMF.get().getPersistenceManager();
-			Game g = new Game();
-			resp.setContentType("text/plain");
-			resp.getWriter().println(
-					"Partida creada. Link invitación: " + g.getId());
-			if (g.addPlayer(user.getUserId(), user.getNickname(), 0)) {
-				pm.makePersistent(g);
-			}
-			pm.close();
-			return;
+			// System.out.print("redireccionando al formulario de preferencias");
+			resp.sendRedirect("/preferences.jsp");			
+		}
+		if (pid != null && accion != null && accion.equalsIgnoreCase("join")) {
+			// System.out.print("uniendo a la partida");
+			doGet(req, resp);
+			return;			
 		}
 		if (pid != null) {
-			// System.out.print("redireccionando post vacío\n");
+			// System.out.print("mostrando partida\n");
 			Key k = KeyFactory.createKey(Game.class.getSimpleName(), pid);
 			PersistenceManager pm = PMF.get().getPersistenceManager();
 			Game battle;
@@ -52,8 +49,8 @@ public class HexagameServlet extends HttpServlet {
 				return;
 			}
 		}
-		resp.setContentType("text/plain");
-		resp.getWriter().println("Listado partidas activas del jugador");
+		// System.out.print("redireccionando al listado de partidas\n");
+		resp.sendRedirect("/games.jsp");
 	}
 
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -71,15 +68,14 @@ public class HexagameServlet extends HttpServlet {
 		}
 		String pid = req.getParameter("pid");
 		if (pid == null && accion.equalsIgnoreCase("new")) {
-			// System.out.print("redireccionando post vacío\n");
-			doGet(req, resp);
+			newGame(req, resp, user);
 			return;
 		}
 		Key k = KeyFactory.createKey(Game.class.getSimpleName(), pid);
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game battle;
+		Game game;
 		try {
-			battle = pm.getObjectById(Game.class, k);
+			game = pm.getObjectById(Game.class, k);
 			// System.out.print("partida recuperada del datastore: "+pid+"\n");
 		} catch (Exception e) {
 			// System.out.print("error recuperando partida del datastore: "+pid+"\n");
@@ -88,32 +84,32 @@ public class HexagameServlet extends HttpServlet {
 		// System.out.print("Gestión de la acción <" +accion+
 		// "> para la partida " +pid+"\n");
 		if (accion.equalsIgnoreCase("join")) {
-			if (battle.addPlayer(user.getUserId(), user.getNickname())) {
-				pm.makePersistent(battle);
+			if (game.addPlayer(user.getUserId(), user.getNickname())) {
+				pm.makePersistent(game);
 			}
 		} else if (accion.equalsIgnoreCase("quit")) {
-			if (battle.delPlayer(user.getNickname())) {
-				pm.makePersistent(battle);
+			if (game.delPlayer(user.getNickname())) {
+				pm.makePersistent(game);
 				resp.getWriter().println(
-						"Te has retirado de la partida " + battle.getId());
+						"Te has retirado de la partida " + game.getId());
 				return;
 			}
 		} else if (accion.equalsIgnoreCase("start")) {
-			if (battle.startGame()) {
-				pm.makePersistent(battle);
+			if (game.startGame()) {
+				pm.makePersistent(game);
 			}
 		} else if (accion.equalsIgnoreCase("move")) {
 			String movementString = req.getParameter("m");
 			if (movementString == null) {
-				publishJSONBoard(req, resp, battle);
+				publishJSONBoard(req, resp, game);
 				return;
 			}
-			if (battle.move(movementString)) {
-				pm.makePersistent(battle);
+			if (game.move(movementString)) {
+				pm.makePersistent(game);
 			}
 		}
 		pm.close();
-		publishJSONBoard(req, resp, battle);
+		publishJSONBoard(req, resp, game);
 	}
 
 	private User checkUser(HttpServletRequest req, HttpServletResponse resp)
@@ -137,5 +133,33 @@ public class HexagameServlet extends HttpServlet {
 						"{\"turno\":" + g.getTurn() + ",\"jugadores\":"
 								+ g.getPlayers() + ",\"tablero\":"
 								+ g.getBoard() + "}");
+	}
+	
+	private void newGame(HttpServletRequest req, HttpServletResponse resp, User user)
+			throws IOException {
+		String i, d, e;
+		i = req.getParameter("initialDeltaTurn");
+		d = req.getParameter("deltaTrun");
+		e = req.getParameter("etaTurn");
+		if(i != null && d != null && e != null){
+			PersistenceManager pm = PMF.get().getPersistenceManager();
+			GamePreferences prefs = new GamePreferences(
+					Integer.parseInt(i),
+					Integer.parseInt(d),
+					Integer.parseInt(e)
+					);
+			Game g = new Game(prefs);
+			resp.setContentType("text/plain");
+			resp.getWriter().println(
+					"Partida creada. Link invitación: " + g.getId());
+			if (g.addPlayer(user.getUserId(), user.getNickname(), 0)) {
+				pm.makePersistent(g);
+			}
+			pm.close();
+		} else {
+			// System.out.print("redireccionando al formulario de preferencias");
+			resp.sendRedirect("/preferences.jsp");
+		}
+		return;
 	}
 }

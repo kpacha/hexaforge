@@ -11,16 +11,18 @@
 	
     
     <ul class="menu">
-    	<li><a href="hexagame">Hexaforge</a></li>
-    	<li><a href="hexagame?aid=new">New Battle</a></li>
+    	<li><a href="/games.jsp">Listado partidas</a></li>
+    	<li><a href="/preferences.jsp">Crear partida</a></li>
     	<li>
     		<div><form action="/hexagame" method="get">
+    			<p>Ver partida</p>
     			<p>pid: <input tipe="text" name="pid" value="1"/></p>
     			<p><button value="submit" value="submit" >enviar</button></p>
 			</form></div>
 		</li>
     	<li>
     		<div><form action="/hexagame" method="post">
+    			<p>Otras acciones</p>
     			<p>pid: <input tipe="text" name="pid" value="1"/></p>
     			<p>aid: <select name="aid"/>
         				<option name="new" value="new">new</option>

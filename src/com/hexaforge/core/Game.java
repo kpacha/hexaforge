@@ -41,6 +41,8 @@ public class Game {
 	private long updated;
 	@Persistent
 	private long nextCheck;
+	@Persistent
+	private String preferences;
 
 	@NotPersistent
 	public final static int MAX_PLAYERS = 6;
@@ -50,13 +52,6 @@ public class Game {
 	public final static int MAX_CELLS = 20;
 	@NotPersistent
 	public final static int MIN_CELLS = 10;
-	@NotPersistent
-	public final static int INITIAL_DELTA_TURN = 5; // turnos iniciales
-	@NotPersistent
-	public final static int DELTA_TURN = 1; // turnos a incrementar
-	@NotPersistent
-	public final static int ETA_TURN = 6 * 60 * 60 * 1000;
-	// segundos hasta la siguiente actualización de turnos. 6h en  milisegundos
 	@NotPersistent
 	public final static int STATE_NEW_GAME = 0;
 	// creando el juego. se deberán establecer los parámetos de la partida
@@ -69,6 +64,8 @@ public class Game {
 	public final static int STATE_PLAYING = 3; // partida en marcha
 	@NotPersistent
 	public final static int STATE_GAME_OVER = 4; // partida finalizada
+	@NotPersistent
+	private GamePreferences prefs; // configuración de la partida
 
 	@NotPersistent
 	private Random generator = new Random(); // generador de aleatorios
@@ -86,6 +83,7 @@ public class Game {
 		crc32.update((int) created);
 		id = Long.toString(created) + Long.toString(crc32.getValue());
 		key = KeyFactory.createKey(Game.class.getSimpleName(), id);
+		setPreferences(new GamePreferences());
 	}
 
 	public Game(Key k, long c, String i) {
@@ -93,6 +91,11 @@ public class Game {
 		key = k;
 		created = c;
 		id = i;
+	}
+
+	public Game(GamePreferences p) {
+		this();
+		setPreferences(p);		
 	}
 
 	public void setKey(Key key) {
@@ -109,6 +112,16 @@ public class Game {
 
 	public void setTurn(int t) {
 		turn = t;
+	}
+
+	public void setPreferences(String p) {
+		preferences = p;
+		prefs = new GamePreferences(p);
+	}
+
+	public void setPreferences(GamePreferences p) {
+		preferences = p.toString();
+		prefs = p;
 	}
 
 	public void setBoard(String t) {
@@ -157,6 +170,15 @@ public class Game {
 
 	public int getTurn() {
 		return turn;
+	}
+
+	public String getPreferences() {
+		return preferences;
+	}
+
+	public GamePreferences getGamePreferences() {
+		prefs = new GamePreferences(preferences);
+		return prefs;
 	}
 
 	public String getTiradas() {
@@ -315,13 +337,17 @@ public class Game {
 			}
 			board = b.serializeBoard();
 			// asignamos turnos iniciales
-			if (!addTurns(INITIAL_DELTA_TURN)) {
+			//System.out.print("\n-----------------------------------------------\n");
+			//System.out.print("startGame(): initialDeltaTurn=" + this.getGamePreferences().getInitialDeltaTurn());
+			//System.out.print("\npreferences=" + preferences);
+			//System.out.print("\n-----------------------------------------------\n");
+			if (!addTurns(this.getGamePreferences().getInitialDeltaTurn())) {
 				// System.out.print("error iniciando los turnos de : " +id+
 				// "\n"); // testing
 				return false;
 			}
 			// programamos incremento turnos
-			nextCheck = created + ETA_TURN;
+			nextCheck = (new Date()).getTime() + prefs.getEtaTurn();
 			state = STATE_PLAYING;
 		}
 		// System.out.print("estado final : " +state+ "\n"); 
@@ -330,8 +356,15 @@ public class Game {
 	}
 
 	public boolean move(String m) {
-
 		return false;
+	}
+
+	public boolean isJoinable() {
+		return (state < STATE_PLAYING);
+	}
+
+	public boolean isFinished() {
+		return (state == STATE_GAME_OVER);
 	}
 
 	private String pickRand(String[] array) {
