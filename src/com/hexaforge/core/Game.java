@@ -134,7 +134,7 @@ public class Game {
 
 	public void setPlayers(String j) {
 		players = j;
-		totPlayers = j.split("\\],\\[").length;
+		totPlayers = j.split("\\},\\{").length;
 		// System.out.print("Seteando jugadores desde String: "+j+"\n");
 	}
 
@@ -226,8 +226,8 @@ public class Game {
 		if (totPlayers != 0) {
 			pV = txt2Players(players);
 			if (pV.size() != totPlayers) {
-				// System.out.print("Los totales no coinciden: " +totPlayers+
-				// ", " +pV.size()+ "\n"); // testing
+				 System.out.print("Los totales no coinciden: " +totPlayers+
+				 ", " +pV.size()+ "\n"); // testing
 				return false;
 			}
 		}
@@ -237,7 +237,7 @@ public class Game {
 						|| (color == ((Player) pV.elementAt(c)).getColor()))
 					return false;
 			}
-			// System.out.print("Player added. id: " +id+ ", name: " +name+
+			//System.out.print("Player added. id: " +id+ ", name: " +name+
 			// ", color: " +color+ "\n"); // testing
 			Player p = new Player(id, name, color);
 			pV.add(p);
@@ -309,7 +309,7 @@ public class Game {
 	private Vector<Player> txt2Players(String j) {
 		Vector<Player> v = new Vector<Player>();
 		j = (String) j.subSequence(1, j.length() - 1);
-		String[] p = j.split("\\],\\[");
+		String[] p = j.split("\\},\\{");
 		for (int i = 0; i < p.length; i++) {
 			if (i == 0)
 				p[i] = (String) p[i].subSequence(1, p[i].length());

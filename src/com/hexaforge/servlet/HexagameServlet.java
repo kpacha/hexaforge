@@ -35,19 +35,8 @@ public class HexagameServlet extends HttpServlet {
 		}
 		if (pid != null) {
 			// System.out.print("mostrando partida\n");
-			Key k = KeyFactory.createKey(Game.class.getSimpleName(), pid);
-			PersistenceManager pm = PMF.get().getPersistenceManager();
-			Game battle;
-			try {
-				battle = pm.getObjectById(Game.class, k);
-				// System.out.print("partida recuperada del datastore: "+pid+"\n");
-				resp.setContentType("text/x-json");
-				publishJSONBoard(req, resp, battle);
-				return;
-			} catch (Exception e) {
-				// System.out.print("error recuperando partida del datastore: "+pid+"\n");
-				return;
-			}
+			showGame(req, resp, pid);
+			return;
 		}
 		// System.out.print("redireccionando al listado de partidas\n");
 		resp.sendRedirect("/games.jsp");
@@ -126,11 +115,9 @@ public class HexagameServlet extends HttpServlet {
 
 	private void publishJSONBoard(HttpServletRequest req,
 			HttpServletResponse resp, Game g) throws IOException {
-		// String result =
-		// "{\"turno\":"+b.getTurn()+",\"jugadores\":"+b.getPlayers()+",\"tablero\":"+b.getBoard()+"}";
 		resp.getWriter()
 				.println(
-						"{\"turno\":" + g.getTurn() + ",\"jugadores\":"
+						"{\"turno\":\"" + g.getTurn() + "\",\"jugadores\":"
 								+ g.getPlayers() + ",\"tablero\":"
 								+ g.getBoard() + "}");
 	}
@@ -162,4 +149,22 @@ public class HexagameServlet extends HttpServlet {
 		}
 		return;
 	}
+	
+	private void showGame(HttpServletRequest req, HttpServletResponse resp, String pid)
+			throws IOException {
+		Key k = KeyFactory.createKey(Game.class.getSimpleName(), pid);
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Game game;
+		try {
+			game = pm.getObjectById(Game.class, k);
+			// System.out.print("partida recuperada del datastore: "+pid+"\n");
+			resp.setContentType("text/x-json");
+			publishJSONBoard(req, resp, game);
+			return;
+		} catch (Exception e) {
+			// System.out.print("error recuperando partida del datastore: "+pid+"\n");
+			return;
+		}
+	}
+
 }

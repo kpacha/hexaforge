@@ -10,29 +10,23 @@ public class Board {
 	private int totHexagon;
 
 	public Board(String b) {
-		// [[20,20],[[0,0,"p",0],[0,1,"s",0],[19,19,"l",2]]]
+		// {"maxX":"20","maxY":"20",[{"x":"0","y":"0","piece":"p","player":"0"},{"x":"5","y":"3","piece":"s","player":"1"}]}
 		b = (String) b.subSequence(1, b.length() - 1);
-		// [20,20],[[0,0,"p",0],[0,1,"s",0],[19,19,"l",2]]
-		String[] p = b.split("\\],\\[\\[");
-		// p[0]=[20,20
-		p[0] = (String) p[0].subSequence(1, p[0].length());
-		String[] max = p[0].split(",");
-		maxX = Integer.valueOf(max[0]);
-		maxY = Integer.valueOf(max[1]);
-		// p[1]=0,0,"p",0],[0,1,"s",0],[19,19,"l",2]]
-		p[1] = "[" + (String) p[1].subSequence(0, p[1].length() - 1);
-		// p[1]=[0,0,"p",0],[0,1,"s",0],[19,19,"l",2]
-		String[] cells = p[1].split("\\],\\[");
+		// "maxX":"20","maxY":"20",[{"x":"0","y":"0","piece":"p","player":"0"},{"x":"5","y":"3","piece":"s","player":"1"}]
+		String[] p = b.split(",\\[");
+		// p[0]="maxX":"20","maxY":"20"
+		maxX = Integer.valueOf(p[0].split(",")[0].split(":")[1]);
+		maxY = Integer.valueOf(p[0].split(",")[1].split(":")[1]);
+		// p[1]={"x":"0","y":"0","piece":"p","player":"0"},{"x":"5","y":"3","piece":"s","player":"1"}]
+		p[1] = (String) p[1].subSequence(1, p[1].length() - 2);
+		// p[1]="x":"0","y":"0","piece":"p","player":"0"},{"x":"5","y":"3","piece":"s","player":"1"
+		String[] cells = p[1].split("\\},\\{");
+		// cells[0]="x":"0","y":"0","piece":"p","player":"0"
+		// cells[1]="x":"5","y":"3","piece":"s","player":"1"
 		totHexagon = cells.length;
 		hexagon = new Vector<Hexagon>();
 		for (int i = 0; i < totHexagon; i++) {
-			if (i == 0)
-				cells[i] = (String) cells[i].subSequence(1, cells[i].length());
-			if (i == totHexagon - 1)
-				cells[i] = (String) cells[i].subSequence(0,
-						cells[i].length() - 1);
-			// cells[0]=0,0,"p",0
-			hexagon.add(new Hexagon(cells[i]));
+			hexagon.add(new Hexagon("{" + cells[i] + "}"));
 		}
 	}
 
@@ -51,7 +45,7 @@ public class Board {
 	}
 
 	public String serializeBoard() {
-		return "[[" + maxX + "," + maxY + "]," + serializeCells() + "]";
+		return "{\"maxX\":\"" + maxX + "\", \"maxY\":\"" + maxY + "\"," + serializeCells() + "}";
 	}
 
 	private String serializeCells() {

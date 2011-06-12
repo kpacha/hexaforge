@@ -53,30 +53,25 @@ public class Player {
 		turns += t;
 	}
 
-	public String[] toArray() {
-		return new String[] { id, name, String.valueOf(color),
-				String.valueOf(turns) };
-	}
-
 	public String toString() {
-		// System.out.print("maquetando: [\"" + id + "\",\"" + name + "\",\"" +
-		// color + "\",\"" + turns + "\"]\n");
-		return "[\"" + id + "\",\"" + name + "\",\"" + color + "\",\"" + turns
-				+ "\"]";
-	}
-
-	public void fromArray(String[] s) {
-		id = (String) s[0].subSequence(1, s[0].length() - 1);
-		name = (String) s[1].subSequence(1, s[1].length() - 1);
-		color = Integer
-				.parseInt((String) s[2].subSequence(1, s[2].length() - 1));
-		turns = Integer
-				.parseInt((String) s[3].subSequence(1, s[3].length() - 1));
-		// System.out.print("Player: parseando array: ['"+id+"','"+name+"','"+color+"','"+turns+"']\n");
+		// System.out.print("maquetando: {\"id\":\"" + id + "\", \"name\":\"" + name + "\", \"color\":\""
+		//		+ color + "\", \"turns\":\"" + turns + "\"}\n");
+		return "{\"id\":\"" + id + "\", \"name\":\"" + name + "\", \"color\":\"" + color 
+				+ "\", \"turns\":\"" + turns + "\"}";
 	}
 
 	public void fromString(String s) {
-		// System.out.print("Player: parseando string: ["+s+"]\n");
-		fromArray(s.split(","));
+		// System.out.print("Player: maquetando: "+s+"\n");
+		// "id":"18580476422013912411", "name":"test@example.com", "color":"0", "turns":"0"
+		String[] properties = s.split(",");
+		id = extractValue(properties[0]);
+		name = extractValue(properties[1]);
+		color = Integer.parseInt(extractValue(properties[2]));
+		turns = Integer.parseInt(extractValue(properties[3]));
+	}
+	
+	private String extractValue(String v){
+		v = v.split(":")[1];
+		return (String) v.subSequence(1, v.length() - 1);
 	}
 }

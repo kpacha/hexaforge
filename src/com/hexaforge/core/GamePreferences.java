@@ -94,9 +94,9 @@ public class GamePreferences {
 	 */
 	@Override
 	public String toString() {
-		return "[\"initialDeltaTurn\":\"" + initialDeltaTurn
+		return "{\"initialDeltaTurn\":\"" + initialDeltaTurn
 				+ "\", \"deltaTrun\":\"" + deltaTurn + "\", \"etaTurn\":\""
-				+ etaTurn + "\"]";
+				+ etaTurn + "\"}";
 	}
 
 }
