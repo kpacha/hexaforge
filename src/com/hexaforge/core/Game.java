@@ -298,7 +298,7 @@ public class Game {
 			Player p = (Player) player.get(i);
 			result += p.toString();
 			if (i < player.size() - 1) {
-				result += ",";
+				result += ", ";
 			}
 		}
 		result += "]";
@@ -309,7 +309,7 @@ public class Game {
 	private Vector<Player> txt2Players(String j) {
 		Vector<Player> v = new Vector<Player>();
 		j = (String) j.subSequence(1, j.length() - 1);
-		String[] p = j.split("\\},\\{");
+		String[] p = j.split("\\}, \\{");
 		for (int i = 0; i < p.length; i++) {
 			if (i == 0)
 				p[i] = (String) p[i].subSequence(1, p[i].length());

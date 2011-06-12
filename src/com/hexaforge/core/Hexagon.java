@@ -12,9 +12,9 @@ public class Hexagon {
 
 	public Hexagon(String h) {
 		// System.out.print("Hexagon: maquetando: '"+h+"'\n");
-		// h = {"x":"0","y":"0","piece":"p","player":"0"}
+		// h = {"x":"0", "y":"0", "piece":"p", "player":"0"}
 		h = (String) h.subSequence(1, h.length() - 1);
-		String[] params = h.split(",");
+		String[] params = h.split(", ");
 		x = Integer.parseInt(extractValue(params[0]));
 		y = Integer.parseInt(extractValue(params[1]));
 		char pieza = extractValue(params[2]).charAt(0);
@@ -42,8 +42,8 @@ public class Hexagon {
 
 	@Override
 	public String toString() {
-		return "{\"x\":\"" + x + "\",\"y\":\"" + y + "\",\"contenido\":\""
-				+ contenido + "\",\"propietario\":\"" + propietario + "\"}";
+		return "{\"x\":\"" + x + "\", \"y\":\"" + y + "\", \"contenido\":\""
+				+ contenido + "\", \"propietario\":\"" + propietario + "\"}";
 	}
 
 	public int getX() {

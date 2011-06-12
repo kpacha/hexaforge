@@ -63,7 +63,7 @@ public class Player {
 	public void fromString(String s) {
 		// System.out.print("Player: maquetando: "+s+"\n");
 		// "id":"18580476422013912411", "name":"test@example.com", "color":"0", "turns":"0"
-		String[] properties = s.split(",");
+		String[] properties = s.split(", ");
 		id = extractValue(properties[0]);
 		name = extractValue(properties[1]);
 		color = Integer.parseInt(extractValue(properties[2]));

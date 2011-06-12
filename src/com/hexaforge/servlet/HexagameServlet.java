@@ -117,8 +117,8 @@ public class HexagameServlet extends HttpServlet {
 			HttpServletResponse resp, Game g) throws IOException {
 		resp.getWriter()
 				.println(
-						"{\"turno\":\"" + g.getTurn() + "\",\"jugadores\":"
-								+ g.getPlayers() + ",\"tablero\":"
+						"{\"turno\":\"" + g.getTurn() + "\", \"jugadores\":"
+								+ g.getPlayers() + ", \"tablero\":"
 								+ g.getBoard() + "}");
 	}
 	
