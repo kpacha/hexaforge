@@ -12,8 +12,8 @@ UserService userService = UserServiceFactory.getUserService();
 User user = userService.getCurrentUser();
 if (user != null) {
 %>
-<p>Hello, <%= user.getNickname() %>! (You can
-<a href="<%= userService.createLogoutURL(request.getRequestURI()) %>">sign out</a>.)</p>
+<p>Hola, <%= user.getNickname() %>!
+(<a href="<%= userService.createLogoutURL(request.getRequestURI()) %>">cerrar sesión</a>.)</p>
 <%
 GamePreferences p = new GamePreferences();
 %>
@@ -29,9 +29,9 @@ GamePreferences p = new GamePreferences();
 <%
 } else {
 %>
-<p>Hello!
-<a href="<%= userService.createLoginURL(request.getRequestURI()) %>">Sign in</a>
-to play a game.</p>
+<p>Hola!
+<a href="<%= userService.createLoginURL(request.getRequestURI()) %>">Logueate</a>
+para continuar.</p>
 <%
 }
 %>
