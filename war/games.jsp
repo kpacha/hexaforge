@@ -10,8 +10,18 @@
 <%@ page import="com.hexaforge.util.PMF" %>
 
 <html>
-<body>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Hexaforge</title>
+	<link href="static/main.css" rel="stylesheet" type="text/css" />
+  </head>
 
+  <body>
+
+<div id="header_container">
+  <div id="header">
+    <div id="logo">
+      <div id="login">
 <%
 UserService userService = UserServiceFactory.getUserService();
 User user = userService.getCurrentUser();
@@ -29,7 +39,17 @@ para continuar.</p>
 return;
 }
 %>
+ 	  </div>
+    </div>
+    <%@include file='header.htm'%>
+  </div>
+</div>
 
+<%@include file='news.htm'%>
+
+<div id="bodymiddlePan">
+  <h2>Listado partidas</h2>
+  
 <%
 PersistenceManager pm = PMF.get().getPersistenceManager();
 String query = "select from " + Game.class.getName() + " order by nextCheck asc range 0,10";
@@ -47,7 +67,7 @@ for (Game g : games) {
 if(g.getId() != null){
 %>
 <li>
-	<p>Partida <b><%= g.getId() %></b>. Estado: [<%= g.getState() %>].</p>
+	<h3>Partida <b><%= g.getId() %></b>. Estado: [<%= g.getState() %>].</h3>
 	<ul>
 		<li>Preferencias: <%= g.getPreferences() %></li>
 		<li>Jugadores: <%= g.getPlayers() %></li>
@@ -84,6 +104,10 @@ if(g.getId() != null){
 pm.close();
 %>
 </ul>
+</div>
+
+<%@include file='footer.htm'%>
+
 </body>
 </html>
 
