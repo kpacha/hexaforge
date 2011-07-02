@@ -90,4 +90,13 @@ public class Board {
 		}
 		return -1;
 	}
+
+	public boolean move(Player p, String m) {
+		// TODO deserializar m
+		// TODO validar que p posee la celda de origen
+		// TODO validar que la celda de destino está vacía
+		// TODO validar que la celda de destino está a 1 casilla
+		// TODO ordenar movimiento a la celda de origen
+		return false;
+	}
 }
