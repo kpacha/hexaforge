@@ -12,6 +12,7 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.hexaforge.core.Game;
 import com.hexaforge.core.GamePreferences;
+import com.hexaforge.util.Channel;
 import com.hexaforge.util.PMF;
 
 @SuppressWarnings("serial")
@@ -76,27 +77,49 @@ public class HexagameServlet extends HttpServlet {
 		if (accion.equalsIgnoreCase("join")) {
 			if (game.addPlayer(user.getUserId(), user.getNickname())) {
 				pm.makePersistent(game);
-			}
-		} else if (accion.equalsIgnoreCase("quit")) {
-			if (game.delPlayer(user.getNickname())) {
-				pm.makePersistent(game);
-				resp.getWriter().println(
-						"Te has retirado de la partida " + game.getId());
+			} else {
+				resp.sendRedirect("/partida_llena.html");
 				return;
 			}
-		} else if (accion.equalsIgnoreCase("start")) {
-			if (game.startGame()) {
-				pm.makePersistent(game);
-			}
-		} else if (accion.equalsIgnoreCase("move")) {
-			String movementString = req.getParameter("m");
-			if (movementString == null) {
-				resp.getWriter().println(game.toString());
+		} else {
+			if (!game.isPlaying(user.getNickname())) {
+				resp.sendRedirect("/error.html");
 				return;
 			}
-			if (game.move(movementString)) {
-				pm.makePersistent(game);
+			if (accion.equalsIgnoreCase("quit")) {
+				if (game.delPlayer(user.getNickname())) {
+					pm.makePersistent(game);
+					resp.getWriter().println(
+							"Te has retirado de la partida " + game.getId());
+					return;
+				} else {
+					resp.sendRedirect("/error.html");
+					return;
+				}
+			} else if (accion.equalsIgnoreCase("start")) {
+				if (game.startGame()) {
+					pm.makePersistent(game);
+				} else {
+					resp.sendRedirect("/error.html");
+					return;
+				}
+			} else if (accion.equalsIgnoreCase("move")) {
+				String movementString = req.getParameter("m");
+				if (movementString == null) {
+					resp.getWriter().println(game.toString());
+					return;
+				}
+				if (game.move(user.getUserId(), movementString)) {
+					pm.makePersistent(game);
+				} else {
+					resp.sendRedirect("/error.html");
+					return;
+				}
+			} else {
+				resp.sendRedirect("/error.html");
+				return;
 			}
+			game.sendUpdateToClients();
 		}
 		pm.close();
 		resp.getWriter().println(game.toString());

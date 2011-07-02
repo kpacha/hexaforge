@@ -15,6 +15,7 @@ import javax.jdo.annotations.PrimaryKey;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.hexaforge.util.Channel;
 
 @PersistenceCapable(identityType = IdentityType.APPLICATION)
 public class Game {
@@ -66,6 +67,8 @@ public class Game {
 	public final static int STATE_GAME_OVER = 4; // partida finalizada
 	@NotPersistent
 	private GamePreferences prefs; // configuración de la partida
+	@NotPersistent
+	private Channel channel;
 
 	@NotPersistent
 	private Random generator = new Random(); // generador de aleatorios
@@ -192,6 +195,19 @@ public class Game {
 	public String getPlayers() {
 		return players;
 	}
+	
+	public Vector<Player> getPlayersVector() {
+		return this.txt2Players(players);
+	}
+	
+	public Player getPlayer(String userId) {
+		for(Player p : this.txt2Players(players)) {
+			if (p.getId() == userId) {
+				return p;
+			}
+		}
+		return null;
+	}
 
 	public long getCreated() {
 		return created;
@@ -288,8 +304,22 @@ public class Game {
 					state = STATE_JOIN_GAME;
 				return true;
 			}
-		} else
+		} 
+		return false;
+	}
+	
+	public boolean isPlaying(String name) {
+		Vector<Player> pV = new Vector<Player>();
+		if (totPlayers != 0) {
+			pV = txt2Players(players);
+		} else {
 			return false;
+		}
+		for (int c = 0; c < totPlayers; c++) {
+			if (name.equals(((Player) pV.elementAt(c)).getName()))
+				return true;
+		}
+		return false;
 	}
 
 	private String players2Txt(Vector<Player> player) {
@@ -332,8 +362,8 @@ public class Game {
 			Board b = new Board(MAX_CELLS);
 			for (int i = 0; i < totPlayers; i++) {
 				// asignamos posiciones iniciales
-				b.addCell(new Hexagon(rnd(MAX_CELLS), rnd(MAX_CELLS),
-						Hexagon.fichas.charAt(rnd(Hexagon.TIPOS_FICHAS)), i));
+				b.addCell(new Piece(rnd(MAX_CELLS), rnd(MAX_CELLS),
+						Piece.fichas.charAt(rnd(Piece.TIPOS_FICHAS)), i));
 			}
 			board = b.serializeBoard();
 			// asignamos turnos iniciales
@@ -355,7 +385,12 @@ public class Game {
 		return state == STATE_PLAYING;
 	}
 
-	public boolean move(String m) {
+	public boolean move(String userId, String m) {
+		Player p = this.getPlayer(userId);
+		if (p.getTurns() > 0) {
+			Board b = new Board(board);
+			return b.move(p, m);
+		}
 		return false;
 	}
 
@@ -393,6 +428,22 @@ public class Game {
 	public String toString(){
 		return "{\"turno\":\"" + this.getTurn() + "\", \"jugadores\":"
 			+ this.getPlayers() + ", \"tablero\":"
-			+ this.getBoard() + "}";
+			+ this.getBoard() + ", \"estado\":\""
+			+ this.getState() + "\"}";
+	}
+	
+	public String toString(String playerId){
+		String channelString = "";
+		if(this.isPlaying(playerId)) {
+			channel = new Channel(this);
+			channelString = ", \"token\":\"" + channel.getChannelKey(playerId) + "\"";
+		}
+		String result = this.toString();
+		return result.substring(0, result.length() - 1) + channelString + "}";
+	}
+	
+	public void sendUpdateToClients() {
+		channel = new Channel(this);
+		channel.sendUpdateToClients();
 	}
 }
