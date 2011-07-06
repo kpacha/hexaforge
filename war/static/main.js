@@ -1,3 +1,4 @@
+
 // JavaScript Document
 	
 	//variables globales
@@ -6,8 +7,9 @@
 	var positions=new Array();
 	var moviendo=false;
 	var pieza_moviendo="";
+	var rango=1;//La distancia que se puede mover.
 	
-	//rutas im√°genes para piezas
+	//rutas im·genes para piezas
 	var clase_pieza=new Array();
 	clase_pieza["r"]="rock";
 	clase_pieza["t"]="scissors";
@@ -22,56 +24,48 @@
 	color_jugador["3"]="green";
 	color_jugador["4"]="pink";
 	color_jugador["5"]="brown";
+	id_jugador="baterpruf";
 	
-	//simulaci√≥n posici√≥n inicial tablero, la letra es la pieza y el n√∫mero es el jugador
-	positions["2-2"]="p1";
-	positions["7-1"]="t1";
-	positions["10-5"]="l2";
-	positions["1-1"]="s2";
-	positions["2-1"]="l2";
-	positions["5-4"]="p3";
-	positions["2-3"]="s3";
-	positions["3-2"]="t4";
-	positions["8-3"]="s3";
-	positions["9-2"]="s4";
-	positions["1-4"]="p5";
-	positions["12-4"]="l5";
+	//simulaciÛn posiciÛn inicial tablero, la letra es la pieza y el n˙mero es el jugador
+	//positions["2-2"]="p1";
+	//positions["5-4"]="p3";
+	//positions["2-3"]="s3";
+	//positions["3-2"]="t4";
+	//positions["9-2"]="s4";
+	//positions["12-4"]="l5";
+	var positions;
 	positions["12-1"]="r5";
-	positions["3-1"]="r2";
+	positions["3-3"]="s3";
+	positions["1-4"]="p5";
 	
-    //Comprobaci√≥n paridad
+    //ComprobaciÛn paridad
     function isEven(value){
       	return value%2 == 0;
     }
+    
+    function getX(celda){
+    	return parseInt(celda.substring(3,(celda.indexOf("-"))));
+    }
+    function getY(celda){
+    	return parseInt(celda.substring((celda.indexOf("-")+1)));
+    }
+    
 	//funcion que devuelve las casillas vecinas libres
 	function get_destinos(celda){
 		//celda es el id central, tipo hex6-2
 		var lista=new Array();
-        range = parseInt($("#range").html());
-        leftOffset = parseInt(celda.substring(3,(celda.indexOf("-"))));
-        topOffset = parseInt(celda.substring((celda.indexOf("-")+1)));
-        if (isEven(leftOffset)) {
-            up   = 1;
-            down = 0;
-        }else{
-            up   = 0;
-            down = 1;
-        }
+        range = rango;
+        leftOffset = getX(celda);
+        topOffset = getY(celda);
+        //up significa que la celda est· m·s alta que su equivalente siguiente y down el contrario
+        up=isEven(leftOffset);
+        down=!isEven(leftOffset);
         for (i=1;i<(range+1);i++) {
             //encima
 			lista.push("hex" + (leftOffset) + "-" + (topOffset-i));
-            if (isEven(i)) {
-                if (isEven(leftOffset)) {
-                    addoneAbove = 0;
-                    addoneBelow = 1;
-                }else{
-                    addoneAbove = 1;
-                    addoneBelow = 0;
-                }
-            }else{
-                addoneAbove = 0;
-                addoneBelow = 0;
-            }
+            //variables para calculo de vecinos
+			addoneAbove = (isEven(i) && !isEven(leftOffset));
+			addoneBelow = (isEven(i) && isEven(leftOffset));
             rangeOffset = Math.round(i/2);
             for (j=0;j<(range+rangeOffset-i);j++) {
                 //arriba izquierda
@@ -85,58 +79,35 @@
 				//Esto de abajo solo vale si activamos rango para saltar varias casillas.
                 if (addoneAbove != 0) {
                     //encima derecha
-                    lista.push("hex" + (leftOffset+i) + "-" + (topOffset-up-j-addoneAbove));tracear(3);
+                    lista.push("hex" + (leftOffset+i) + "-" + (topOffset-up-j-addoneAbove));
                     //arriba izquierda
                     lista.push("hex" + (leftOffset-i) + "-" + (topOffset-up-j-addoneAbove)) ;
                 }else if (addoneBelow != 0) {
                     //abajo derecha
-                    lista.push("hex" + (leftOffset+i) + "-" + (topOffset+down+j+addoneBelow)) ;tracear(4);
+                    lista.push("hex" + (leftOffset+i) + "-" + (topOffset+down+j+addoneBelow)) ;
                     //abajo izquierda
                     lista.push("hex" + (leftOffset-i) + "-" + (topOffset+down+j+addoneBelow)) ;
-					
                 }
             }
-            //below
+            //abajo
             lista.push("hex" + (leftOffset) + "-" + (topOffset+i));
-			
-			
         }
 		for(i in lista){
-			tx=parseInt(lista[i].substring(3,lista[i].indexOf("-")));
-			ty=parseInt(lista[i].substring((lista[i].indexOf("-")+1)));
-			tracear(tx+ty);
+			tx=getX(lista[i]);
+			ty=getY(lista[i]);
 			if( tx>=0 && ty>=0 && tx<columnas && ty<filas){
-				if(!$("#"+lista[i])[0].contiene()){
-					$("#"+lista[i])[0].esperar();
-					active_div_range.push(lista[i]);
-				}
+				$("#"+lista[i])[0].esperar();
+				active_div_range.push(lista[i]);
 			}
-			//tracear(lista[i]);
-		}
-		for(j in active_div_range){
-			//tracear(active_div_range[j]);
 		}
     }
-	
-	function checkandchange(value){
-			if (value.length) {
-                value.esperar();
-				
-            }
-	}
-	
-	function enviar_movimiento(id_origen, id_final){
-		$("#marcador").html($("#marcador").html()+"enviar al servidor "+id_origen+" hacia "+ id_final+"<br>Respuesta: OK<br>");
-		return true;	
-	}
 	function tracear(algo){
-		$("#marcador").html(algo+$("#marcador").html());
+		$("#marcador").html($("#marcador").html()+algo);
 	}
-
-	//creaci√≥n de una casilla y su comportamiento
+	//creaciÛn de una casilla y su comportamiento
 	function createHexSpace(leftOffset,topOffset)
     {
-        //Contenedor global, m√°s grande, muestra el fondo hexagono
+        //Contenedor global, m·s grande, muestra el fondo hexagono
 		var divTag = document.createElement("div");
 		divTag.x=x;
 		divTag.y=y;
@@ -146,7 +117,13 @@
         divTag.style.left = leftOffset + "px";
         divTag.style.top = topOffset + "px";
         divTag.className ="hexspace";
+        this.contenido="";
 		
+		divTag.insertar = function(piezacolor){
+			subdiv.css("background-color",color_jugador[piezacolor.charAt(1)]);
+			subdiv.addClass(clase_pieza[piezacolor.charAt(0)]);
+			tracear("hola");
+		}
 		//Subcontenedor con la pieza, muestra el color y el gif de la pieza
 		$("body").append('<div id="sub' + x + "-" + y+'"></div>');
 		subdiv=$("#sub"+ x + "-" + y);
@@ -154,9 +131,10 @@
 		if(positions[x+"-"+y]){
 			subdiv.css("background-color",color_jugador[positions[x+"-"+y].charAt(1)]);
 			subdiv.addClass(clase_pieza[positions[x+"-"+y].charAt(0)]);
+			this.contenido=positions[x+"-"+y];
+			//this.insertar();
 		}
 		$(divTag).append(subdiv);
-		
 		$(divTag).bind("mouseover", function() {
             if(!moviendo){
 				this.encender();
@@ -176,12 +154,11 @@
         });
 		$(divTag).click(function() {
 			//limpiar todos los fondos
-			
 			if(!moviendo){
 				apagarTodo();
 				//si no es movimiento correcto abortamos movimiento y salimos
 				//TODO: que compruebe que la pieza es propia
-				//TODO: en modo an√°lisis no hace falta mirar que sea propia.
+				//TODO: en modo an·lisis no hace falta mirar que sea propia.
 				if(!this.contiene()){
 					active_div=null;
 					moviendo=false;
@@ -197,33 +174,30 @@
 					pieza_moviendo=positions[this.x.toString()+"-"+this.y.toString()];
 					return;
 				}
-				
 			}
 			//Soltar una pieza
 			if(moviendo){
-				if(this.contiene() /*&& no es mi color*/){
-					//Esto ser√≠a un ataque, moverse a una celda ocupada que no es de mi color
-					tipo_defensor=this.tipo();
-					tipo_atacante=$("#"+active_div.id)[0].tipo();
-					tracear(clase_pieza[tipo_atacante]+" contra "+clase_pieza[tipo_defensor]+"<br>");
-				}
 				moviendo=false;
-				valido=$(this).hasClass("hex_esperar")&&!this.contiene();
+				valido=$(this).hasClass("hex_esperar");
 				apagarTodo();
-				//Si es v√°lido hay que ponerla en la nueva posici√≥n
-				if(valido){
-					apagarTodo();
-					id_origen=active_div.id;
-					
-					positions[id_origen.substring(3,(id_origen.length))]="";
-					positions[this.x.toString()+"-"+this.y.toString()]=pieza_moviendo;					
-					active_div=null;
-					$(this).children().css("background-color",color_jugador[pieza_moviendo.charAt(1)]);
-					$(this).children().addClass(clase_pieza[pieza_moviendo.charAt(0)]);
-					//enviar_movimiento(id_origen, this.id);
-					$(this).children().hide();
-					$(this).children().fadeIn();$("#"+id_origen)[0].vaciar();
-					
+				
+				if(valido){//Es v·lido si est· iluminado de esperar
+					if(this.contiene() /*&& no es mi color*/){
+						//Esto serÌa un ataque, moverse a una celda ocupada que no es de mi color
+						intentarAtaque(this.id,active_div.id);
+					}else{//Esto serÌa un movimiento a casilla vacÌa
+						apagarTodo();
+						id_origen=active_div.id;
+						
+						positions[id_origen.substring(3,(id_origen.length))]="";
+						positions[this.x.toString()+"-"+this.y.toString()]=pieza_moviendo;					
+						active_div=null;
+						$(this).children().css("background-color",color_jugador[pieza_moviendo.charAt(1)]);
+						$(this).children().addClass(clase_pieza[pieza_moviendo.charAt(0)]);
+						enviarMovimiento(id_origen, this.id);
+						$(this).children().hide();
+						$(this).children().fadeIn();$("#"+id_origen)[0].vaciar();
+					}
 				}
 				return;
 			}
@@ -259,6 +233,31 @@
 		}
         document.body.appendChild(divTag);
     }
+	intentarAtaque=function(id_origen,id_destino){
+		tracear("atacando: "+id_origen+" hacia "+ id_destino+"<br>");
+		$.get("hexagame", { origen: id_origen, destino: id_destino },function(data){
+				tracear("Respuesta: " + data);
+				//actualizar tablero, eso seguro
+				actualizarTablero();
+				if(true/*Si no se ha podido hacer el movimiento*/){
+					//Mostrar aviso del error. o si no devolver el error en el return.
+				}
+		});
+		return null;
+	};
+	function actualizarTablero(){
+		//recibir el tablero y pintarlo. Mejor todo entero, por si algo ha cambiado
+		return null;
+	}
+	enviarMovimiento=function(id_origen, id_destino){
+		tracear("enviar al servidor "+id_origen+" hacia "+ id_destino+"<br>");
+		$.get("hexagame", { origen: id_origen, destino: id_destino },function(data){
+			for (x in data){
+				tracear("<br>Respuesta: " + x);
+			}
+			});
+		return null;
+	}
 	function apagarTodo(){
 		while(active_div_range.length>0){
 			eliminado=active_div_range.pop();
@@ -271,7 +270,6 @@
 				   temp.limpiar();
 				   $(temp).children().show();
 			})
-			//$(active_div).limpiar();
 		}
 	}
 	function crearTablero(alto,ancho) {
@@ -289,19 +287,53 @@
             }
         }
     }
+	function recuperarTablero(){
+		$.getJSON("hexagame.json",
+			function(data){
+				tracear(data.turno+'<br>');
+				for(x in data.jugadores){
+					tracear('Nombre:'+data.jugadores[x].name+'<br>');
+					tracear('id:'+data.jugadores[x].id+'<br>');
+					tracear('color:'+data.jugadores[x].color+'');
+					tracear('turnos:'+data.jugadores[x].turns+'<br>');
+				};
+				for (v in data.tablero.celdas){
+					tracear("hex"+data.tablero.celdas[v].x+"-"+data.tablero.celdas[v].y);
+					//tracear(positions["hex"+data.tablero.celdas[v].x+"-"+data.tablero.celdas[v].y]="r5");
+					//$("#hex"+data.tablero.celdas[v].x+"-"+data.tablero.celdas[v].y)[0].insertar("r5");
+				}
+			});
+	}
+	 getPlayer=function(){
+		 return id_jugador;
+	 }
+	function pintarMarcador(){
+		$("#info").html('Nombre: <span style="background-color:green">'+getPlayer()+'</span> - Piezas: 4 - Turnos: 5 - <a href="#">Analizar</a> ------ Colores: <span style="background-color:blue">kandahar</span> - <span style="background-color:red">koco</span> - <span style="background-color:brown">kpacha</span> - <span style="background-color:pink">jj</span>');
+	}
+	function iniciarTablero(){
+		filas=7;
+		columnas=15
+        crearTablero(filas,columnas);
+		$("#floorplan").css("width",columnas*73+50);
+		$("#floorplan").css("height",filas*82+60);
+		$("body").hide()
+		$("body").fadeIn()
+	}
 	
 	 $(document).ready( 
 		function() { 
-			filas=7;
-			columnas=15
-            crearTablero(filas,columnas);
-			$("#floorplan").css("width",columnas*73+50);
-			$("#floorplan").css("height",filas*82+60);
-			$("body").hide()
-			$("body").fadeIn()
-			//$("body").fadeOut(500,function(){$("body").fadeIn()});
-			$("#info").html('Nombre: <span style="background-color:green">Baterpruf</span> - Piezas: 4 - Turnos: 5 - <a href="#">Analizar</a> ------ Colores: <span style="background-color:blue">Kandahar</span> - <span style="background-color:red">Koco</span> - <span style="background-color:brown">Kpacha</span> - <span style="background-color:pink">Protoss</span>');
-			tracear("Traces:<br>");
-			
-        }
+			//recuperar json partida
+			idgoogle="baterpruf";
+			iniciarTablero();
+			//iniciar marcador
+			pintarMarcador();
+			recuperarTablero();
+		}
     );
+	
+	
+    
+    
+	
+
+   
