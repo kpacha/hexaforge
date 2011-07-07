@@ -19,39 +19,30 @@
 	
 	//Info jugadores
 	var color_jugador=new Array();
-	color_jugador["1"]="red";
-	color_jugador["2"]="blue";
-	color_jugador["3"]="green";
-	color_jugador["4"]="pink";
-	color_jugador["5"]="brown";
+	color_jugador["0"]="red";
+	color_jugador["1"]="blue";
+	color_jugador["2"]="green";
+	color_jugador["3"]="pink";
+	color_jugador["4"]="brown";
 	id_jugador="baterpruf";
 	
 	//simulación posición inicial tablero, la letra es la pieza y el número es el jugador
-	//positions["2-2"]="p1";
-	//positions["5-4"]="p3";
-	//positions["2-3"]="s3";
-	//positions["3-2"]="t4";
-	//positions["9-2"]="s4";
-	//positions["12-4"]="l5";
 	var positions;
-	positions["12-1"]="r5";
-	positions["3-3"]="s3";
-	positions["1-4"]="p5";
+	//positions["12-1"]="r5";
+	//positions["3-3"]="s3";
 	
     //Comprobación paridad
     function isEven(value){
       	return value%2 == 0;
     }
-    
     function getX(celda){
     	return parseInt(celda.substring(3,(celda.indexOf("-"))));
     }
     function getY(celda){
     	return parseInt(celda.substring((celda.indexOf("-")+1)));
     }
-    
-	//funcion que devuelve las casillas vecinas libres
 	function get_destinos(celda){
+	//funcion que devuelve las casillas vecinas libres
 		//celda es el id central, tipo hex6-2
 		var lista=new Array();
         range = rango;
@@ -120,20 +111,15 @@
         this.contenido="";
 		
 		divTag.insertar = function(piezacolor){
-			subdiv.css("background-color",color_jugador[piezacolor.charAt(1)]);
-			subdiv.addClass(clase_pieza[piezacolor.charAt(0)]);
-			tracear("hola");
+			//subdiv.css("background-color",color_jugador[piezacolor.charAt(1)]);
+			$(this).children().css("background-color",color_jugador[piezacolor.charAt(1)]);
+			$(this).children().addClass(clase_pieza[piezacolor.charAt(0)]);
+			
 		}
 		//Subcontenedor con la pieza, muestra el color y el gif de la pieza
 		$("body").append('<div id="sub' + x + "-" + y+'"></div>');
 		subdiv=$("#sub"+ x + "-" + y);
 		subdiv.addClass ('pieza');
-		if(positions[x+"-"+y]){
-			subdiv.css("background-color",color_jugador[positions[x+"-"+y].charAt(1)]);
-			subdiv.addClass(clase_pieza[positions[x+"-"+y].charAt(0)]);
-			this.contenido=positions[x+"-"+y];
-			//this.insertar();
-		}
 		$(divTag).append(subdiv);
 		$(divTag).bind("mouseover", function() {
             if(!moviendo){
@@ -196,7 +182,8 @@
 						$(this).children().addClass(clase_pieza[pieza_moviendo.charAt(0)]);
 						enviarMovimiento(id_origen, this.id);
 						$(this).children().hide();
-						$(this).children().fadeIn();$("#"+id_origen)[0].vaciar();
+						$(this).children().fadeIn();
+						$("#"+id_origen)[0].vaciar();
 					}
 				}
 				return;
@@ -233,7 +220,7 @@
 		}
         document.body.appendChild(divTag);
     }
-	intentarAtaque=function(id_origen,id_destino){
+	function intentarAtaque(id_origen,id_destino){
 		tracear("atacando: "+id_origen+" hacia "+ id_destino+"<br>");
 		$.get("hexagame", { origen: id_origen, destino: id_destino },function(data){
 				tracear("Respuesta: " + data);
@@ -245,35 +232,63 @@
 		});
 		return null;
 	};
-	function actualizarTablero(){
-		//recibir el tablero y pintarlo. Mejor todo entero, por si algo ha cambiado
-		return null;
-	}
-	enviarMovimiento=function(id_origen, id_destino){
+	function enviarMovimiento(id_origen, id_destino){
 		tracear("enviar al servidor "+id_origen+" hacia "+ id_destino+"<br>");
 		$.get("hexagame", { origen: id_origen, destino: id_destino },function(data){
 			for (x in data){
 				tracear("<br>Respuesta: " + x);
 			}
-			});
+		});
 		return null;
+	}
+	function enviar(){
+		
 	}
 	function apagarTodo(){
 		while(active_div_range.length>0){
 			eliminado=active_div_range.pop();
 			$("#"+eliminado)[0].limpiar();
-			
 		}
 		if(active_div){
 			temp=active_div
-			$(active_div).children().fadeOut(400,function(){
+			$(active_div).children().fadeOut(100,function(){
 				   temp.limpiar();
 				   $(temp).children().show();
 			})
 		}
 	}
-	function crearTablero(alto,ancho) {
+	function actualizarTablero(){
+		//$.getJSON("hexagame.json",function (data){montarTablero(data)});
+		$.getJSON("http://hexaforge.appspot.com/hexagame?pid=13079204655491091244048",function (data){montarTablero(data)});
 		
+	}
+	function montarTablero(data){
+		marcador=new marcador(data.turno, data.jugadores);
+		for(x in data.jugadores){
+			//tracear('Nombre:'+data.jugadores[x].name+'<br>');
+		};
+		for (v in data.tablero.celdas){
+			nombre=data.tablero.celdas[v].x+"-"+data.tablero.celdas[v].y
+			valor=data.tablero.celdas[v].contenido+data.tablero.celdas[v].propietario;
+			positions[nombre]=valor;
+			$("#hex"+nombre)[0].insertar(valor);
+		}
+	}
+	
+	function getPlayer(){
+		 return id_jugador;
+	 }
+	function pintarMarcador(){
+		//$("#info").html('Nombre: <span style="background-color:green">'+getPlayer()+'</span> - Piezas: 4 - Turnos: 5 - <a href="#">Analizar</a> ------ Colores: <span style="background-color:blue">kandahar</span> - <span style="background-color:red">koco</span> - <span style="background-color:brown">kpacha</span> - <span style="background-color:pink">jj</span>');
+	}
+	function marcador(turno,datos){
+		$("#info").html("");
+		for(x in datos){
+			tracear('Nombre:'+datos[x].name+'<br>');
+			$("#info").html($("#info").html()+'<span style="background-color:'+color_jugador[datos[x].color]+'">'+datos[x].name+"</span> ");
+		};
+	}
+	function crearTablero(alto,ancho) {
         for (y=0; y<alto; y++) {
             baseTopOffset = (y * 82)+30;
             for (x=0; x<ancho; x++) {
@@ -287,29 +302,6 @@
             }
         }
     }
-	function recuperarTablero(){
-		$.getJSON("hexagame.json",
-			function(data){
-				tracear(data.turno+'<br>');
-				for(x in data.jugadores){
-					tracear('Nombre:'+data.jugadores[x].name+'<br>');
-					tracear('id:'+data.jugadores[x].id+'<br>');
-					tracear('color:'+data.jugadores[x].color+'');
-					tracear('turnos:'+data.jugadores[x].turns+'<br>');
-				};
-				for (v in data.tablero.celdas){
-					tracear("hex"+data.tablero.celdas[v].x+"-"+data.tablero.celdas[v].y);
-					//tracear(positions["hex"+data.tablero.celdas[v].x+"-"+data.tablero.celdas[v].y]="r5");
-					//$("#hex"+data.tablero.celdas[v].x+"-"+data.tablero.celdas[v].y)[0].insertar("r5");
-				}
-			});
-	}
-	 getPlayer=function(){
-		 return id_jugador;
-	 }
-	function pintarMarcador(){
-		$("#info").html('Nombre: <span style="background-color:green">'+getPlayer()+'</span> - Piezas: 4 - Turnos: 5 - <a href="#">Analizar</a> ------ Colores: <span style="background-color:blue">kandahar</span> - <span style="background-color:red">koco</span> - <span style="background-color:brown">kpacha</span> - <span style="background-color:pink">jj</span>');
-	}
 	function iniciarTablero(){
 		filas=7;
 		columnas=15
@@ -322,12 +314,9 @@
 	
 	 $(document).ready( 
 		function() { 
-			//recuperar json partida
-			idgoogle="baterpruf";
-			iniciarTablero();
-			//iniciar marcador
-			pintarMarcador();
-			recuperarTablero();
+			iniciarTablero();//pero en vacío
+			pintarMarcador();//iniciar marcador
+			actualizarTablero();//recuperar json partida y rellenar las celdas
 		}
     );
 	
