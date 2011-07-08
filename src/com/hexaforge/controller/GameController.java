@@ -60,7 +60,7 @@ public class GameController {
 		return finalizeAction(game.delPlayer(user.getNickname()));
 	}
 	
-	private boolean start(){
+	private boolean start(User user){
 		return finalizeAction(game.startGame());
 	}
 	
