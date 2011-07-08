@@ -6,7 +6,7 @@ var positions = new Array();
 var moviendo = false;
 var pieza_moviendo = "";
 var rango = 1; //La distancia que se puede mover.
-//rutas imágenes para piezas
+//rutas imï¿½genes para piezas
 var clase_pieza = new Array();
 clase_pieza["r"] = "rock";
 clase_pieza["t"] = "scissors";
@@ -23,11 +23,11 @@ color_jugador["3"] = "pink";
 color_jugador["4"] = "brown";
 id_jugador = "baterpruf";
 
-//simulación posición inicial tablero, la letra es la pieza y el número es el jugador
+//simulaciï¿½n posiciï¿½n inicial tablero, la letra es la pieza y el nï¿½mero es el jugador
 var positions;
 //positions["12-1"]="r5";
 //positions["3-3"]="s3";
-//Comprobación paridad
+//Comprobaciï¿½n paridad
 
 
 function isEven(value) {
@@ -49,7 +49,7 @@ function get_destinos(celda) {
     range = rango;
     leftOffset = getX(celda);
     topOffset = getY(celda);
-    //up significa que la celda está más alta que su equivalente siguiente y down el contrario
+    //up significa que la celda estï¿½ mï¿½s alta que su equivalente siguiente y down el contrario
     up = isEven(leftOffset);
     down = !isEven(leftOffset);
     for (i = 1; i < (range + 1); i++) {
@@ -97,11 +97,11 @@ function get_destinos(celda) {
 function tracear(algo) {
     $("#marcador").html($("#marcador").html() + algo);
 }
-//creación de una casilla y su comportamiento
+//creaciï¿½n de una casilla y su comportamiento
 
 
 function createHexSpace(leftOffset, topOffset) {
-    //Contenedor global, más grande, muestra el fondo hexagono
+    //Contenedor global, mï¿½s grande, muestra el fondo hexagono
     var divTag = document.createElement("div");
     divTag.x = x;
     divTag.y = y;
@@ -146,7 +146,7 @@ function createHexSpace(leftOffset, topOffset) {
             apagarTodo();
             //si no es movimiento correcto abortamos movimiento y salimos
             //TODO: que compruebe que la pieza es propia
-            //TODO: en modo análisis no hace falta mirar que sea propia.
+            //TODO: en modo anï¿½lisis no hace falta mirar que sea propia.
             if (!this.contiene()) {
                 active_div = null;
                 moviendo = false;
@@ -169,11 +169,11 @@ function createHexSpace(leftOffset, topOffset) {
             valido = $(this).hasClass("hex_esperar");
             apagarTodo();
 
-            if (valido) { //Es válido si está iluminado de esperar
+            if (valido) { //Es vï¿½lido si estï¿½ iluminado de esperar
                 if (this.contiene() /*&& no es mi color*/ ) {
-                    //Esto sería un ataque, moverse a una celda ocupada que no es de mi color
+                    //Esto serï¿½a un ataque, moverse a una celda ocupada que no es de mi color
                     intentarAtaque(this.id, active_div.id);
-                } else { //Esto sería un movimiento a casilla vacía
+                } else { //Esto serï¿½a un movimiento a casilla vacï¿½a
                     apagarTodo();
                     id_origen = active_div.id;
 
@@ -337,8 +337,8 @@ function crearTablero(alto, ancho) {
 }
 
 function iniciarTablero() {
-    filas = 7;
-    columnas = 15
+    filas = 21;
+    columnas = 21;
     crearTablero(filas, columnas);
     $("#floorplan").css("width", columnas * 73 + 50);
     $("#floorplan").css("height", filas * 82 + 60);
@@ -357,7 +357,7 @@ $(document).ready(
 function () {
 	pid= getUrlVars()["pid"];
 	tracear("partida: "+pid+"<br>");
-    iniciarTablero(); //pero en vacío
+    iniciarTablero(); //pero en vacï¿½o
     pintarMarcador(); //iniciar marcador
     actualizarTablero(); //recuperar json partida y rellenar las celdas
 });
