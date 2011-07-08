@@ -5,11 +5,14 @@ import java.io.IOException;
 import javax.jdo.PersistenceManager;
 import javax.servlet.http.*;
 
+import org.datanucleus.exceptions.NucleusObjectNotFoundException;
+
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.hexaforge.controller.GameController;
 import com.hexaforge.core.Game;
 import com.hexaforge.core.GamePreferences;
 import com.hexaforge.util.Channel;
@@ -65,63 +68,30 @@ public class HexagameServlet extends HttpServlet {
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Game game;
 		try {
-			game = pm.getObjectById(Game.class, k);
-			// System.out.print("partida recuperada del datastore: "+pid+"\n");
-		} catch (Exception e) {
-			// System.out.print("error recuperando partida del datastore: "+pid+"\n");
-			doGet(req, resp);
+			game = pm.getObjectById(Game.class, k);		
+			GameController controller = new GameController(game, pm);
+			if(!controller.execute(accion, user, req.getParameter("m"))){
+				resp.sendRedirect("/error.html");
+				return;
+			}
+		}catch(NucleusObjectNotFoundException e){
+			resp.sendRedirect("/error.html");
+			System.out.print("\nError en la recuperación de la partida : "
+					+ e.getMessage() +"\n");
 			return;
-		}
-		// System.out.print("Gestión de la acción <" +accion+
-		// "> para la partida " +pid+"\n");
-		if (accion.equalsIgnoreCase("join")) {
-			if (game.addPlayer(user.getUserId(), user.getNickname())) {
-				pm.makePersistent(game);
-			} else {
-				resp.sendRedirect("/partida_llena.html");
-				return;
-			}
-		} else {
-			if (!game.isPlaying(user.getNickname())) {
-				resp.sendRedirect("/error.html");
-				return;
-			}
-			if (accion.equalsIgnoreCase("quit")) {
-				if (game.delPlayer(user.getNickname())) {
-					pm.makePersistent(game);
-					resp.getWriter().println(
-							"Te has retirado de la partida " + game.getId());
-					return;
-				} else {
-					resp.sendRedirect("/error.html");
-					return;
-				}
-			} else if (accion.equalsIgnoreCase("start")) {
-				if (game.startGame()) {
-					pm.makePersistent(game);
-				} else {
-					resp.sendRedirect("/error.html");
-					return;
-				}
-			} else if (accion.equalsIgnoreCase("move")) {
-				String movementString = req.getParameter("m");
-				if (movementString == null) {
-					resp.getWriter().println(game.toString());
-					return;
-				}
-				if (game.move(user.getUserId(), movementString)) {
-					pm.makePersistent(game);
-				} else {
-					resp.sendRedirect("/error.html");
-					return;
-				}
-			} else {
-				resp.sendRedirect("/error.html");
-				return;
-			}
-			game.sendUpdateToClients();
-		}
-		pm.close();
+		}catch(Exception e){
+			resp.sendRedirect("/error.html");
+			System.out.print("\nError en la utilización del GameController: "
+					+ e.getMessage() +"\n");
+			System.out.print("\nmás info: "
+					+ e.getCause() +"\n");
+			System.out.print("\nm: "
+					+ req.getParameter("m") +"\n");
+			return;
+		}finally{
+			pm.close();
+		}		
+		game.sendUpdateToClients();
 		resp.getWriter().println(game.toString());
 	}
 
