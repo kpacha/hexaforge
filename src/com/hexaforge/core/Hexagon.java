@@ -4,38 +4,30 @@ public class Hexagon {
 
 	private int x;
 	private int y;
-	private char contenido;
-	private int propietario;
-
-	public static final String fichas = "rtpls";
-	public static final int TIPOS_FICHAS = 5;
+	protected char contenido;
 
 	public Hexagon(String h) {
-		// System.out.print("Hexagon: maquetando: '"+h+"'\n");
-		// h = {"x":"0", "y":"0", "piece":"p", "player":"0"}
-		h = (String) h.subSequence(1, h.length() - 1);
-		String[] params = h.split(", ");
-		x = Integer.parseInt(extractValue(params[0]));
-		y = Integer.parseInt(extractValue(params[1]));
-		char pieza = extractValue(params[2]).charAt(0);
-		for (int i = 0; i < fichas.length(); i++) {
-			if (pieza == fichas.charAt(i)) {
-				contenido = pieza;
-			}
-		}
-		propietario = Integer.parseInt(extractValue(params[3]));
-		// System.out.print("Hexagon: maquetando: ['"+x+"','"+y+"','"+contenido+"','"+propietario+"']\n");
+		Hexagon hexagon = fromString(h);
+		this.setX(hexagon.getX());
+		this.setY(hexagon.getY());
+		this.setContenido(hexagon.getContenido());
+		// System.out.print("Hexagon: maquetando: ['"+x+"','"+y+"','"+contenido+"']\n");
 	}
 
-	public Hexagon(int xPos, int yPos, char c, int p) {
+	public Hexagon(int xPos, int yPos, char c) {
 		x = xPos;
 		y = yPos;
 		contenido = c;
-		propietario = p;
-		// System.out.print("Hexagon: maquetando: ['"+x+"','"+y+"','"+contenido+"','"+propietario+"']\n");
+		// System.out.print("Hexagon: maquetando: ['"+x+"','"+y+"','"+contenido+"']\n");
 	}
 	
-	private String extractValue(String v){
+	public Hexagon(Hexagon hexagon) {
+		this.setX(hexagon.getX());
+		this.setY(hexagon.getY());
+		this.setContenido(hexagon.getContenido());
+	}
+	
+	protected static final String extractValue(String v){
 		v = v.split(":")[1];
 		return (String) v.subSequence(1, v.length() - 1);
 	}
@@ -43,14 +35,58 @@ public class Hexagon {
 	@Override
 	public String toString() {
 		return "{\"x\":\"" + x + "\", \"y\":\"" + y + "\", \"contenido\":\""
-				+ contenido + "\", \"propietario\":\"" + propietario + "\"}";
+				+ contenido + "\"}";
+	}
+	
+	public Hexagon fromString(String h) {
+		// System.out.print("Hexagon: maquetando: '"+h+"'\n");
+		// h = {"x":"0", "y":"0", "piece":"p", "player":"0"}
+		h = (String) h.subSequence(1, h.length() - 1);
+		String[] params = h.split(", ");
+		char contenido = extractValue(params[2]).charAt(0);
+		for (int i = 0; i < Piece.fichas.length(); i++) {
+			if (contenido == Piece.fichas.charAt(i)) {
+				return new Piece(h);
+			}
+		}
+		int x = Integer.parseInt(extractValue(params[0]));
+		int y = Integer.parseInt(extractValue(params[1]));
+		return new Obstacle(x, y, contenido);
 	}
 
-	public int getX() {
+	public final int getX() {
 		return x;
 	}
 
-	public int getY() {
+	public final int getY() {
 		return y;
+	}
+
+	/**
+	 * @return the contenido
+	 */
+	public final char getContenido() {
+		return contenido;
+	}
+
+	/**
+	 * @param x the x to set
+	 */
+	public final void setX(int x) {
+		this.x = x;
+	}
+
+	/**
+	 * @param y the y to set
+	 */
+	public final void setY(int y) {
+		this.y = y;
+	}
+
+	/**
+	 * @param contenido the contenido to set
+	 */
+	public final void setContenido(char contenido) {
+		this.contenido = contenido;
 	}
 }
