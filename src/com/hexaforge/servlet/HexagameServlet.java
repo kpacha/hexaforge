@@ -73,6 +73,10 @@ public class HexagameServlet extends HttpServlet {
 			if(!controller.execute(accion, user, req.getParameter("m"))){
 				resp.sendRedirect("/error.html");
 				return;
+			}else{
+				if(accion.equalsIgnoreCase("start")){
+					resp.sendRedirect("/tablero.html?pid=" + game.getId());
+				}
 			}
 		}catch(NucleusObjectNotFoundException e){
 			resp.sendRedirect("/error.html");

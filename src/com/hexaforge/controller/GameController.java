@@ -42,7 +42,7 @@ public class GameController {
 		//System.out.print("\nHexagameController: resultado accion " + success);
 		if(success){
 			this.pm.makePersistent(game);
-			System.out.print(" así que se han guardado los cambios!");
+			//System.out.print(" así que se han guardado los cambios!");
 			return true;
 		} 
 		return false;
