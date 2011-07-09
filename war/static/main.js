@@ -6,7 +6,7 @@ var positions = new Array();
 var moviendo = false;
 var pieza_moviendo = "";
 var rango = 1; //La distancia que se puede mover.
-//rutas imï¿½genes para piezas
+//rutas imagenes para piezas
 var clase_pieza = new Array();
 clase_pieza["r"] = "rock";
 clase_pieza["t"] = "scissors";
@@ -23,11 +23,11 @@ color_jugador["3"] = "pink";
 color_jugador["4"] = "brown";
 id_jugador = "baterpruf";
 
-//simulaciï¿½n posiciï¿½n inicial tablero, la letra es la pieza y el nï¿½mero es el jugador
+//simulacion posicion inicial tablero, la letra es la pieza y el numero es el jugador
 var positions = [];
 //positions["12-1"]="r5";
 //positions["3-3"]="s3";
-//Comprobaciï¿½n paridad
+//Comprobacion paridad
 
 
 function isEven(value) {
@@ -49,7 +49,7 @@ function get_destinos(celda) {
     range = rango;
     leftOffset = getX(celda);
     topOffset = getY(celda);
-    //up significa que la celda estï¿½ mï¿½s alta que su equivalente siguiente y down el contrario
+    //up significa que la celda esta mas alta que su equivalente siguiente y down el contrario
     up = isEven(leftOffset);
     down = !isEven(leftOffset);
     for (i = 1; i < (range + 1); i++) {
@@ -97,11 +97,11 @@ function get_destinos(celda) {
 function tracear(algo) {
     $("#marcador").html($("#marcador").html() + algo);
 }
-//creaciï¿½n de una casilla y su comportamiento
+//creacion de una casilla y su comportamiento
 
 
 function createHexSpace(leftOffset, topOffset) {
-    //Contenedor global, mï¿½s grande, muestra el fondo hexagono
+    //Contenedor global, mas grande, muestra el fondo hexagono
     var divTag = document.createElement("div");
     divTag.x = x;
     divTag.y = y;
@@ -146,7 +146,7 @@ function createHexSpace(leftOffset, topOffset) {
             apagarTodo();
             //si no es movimiento correcto abortamos movimiento y salimos
             //TODO: que compruebe que la pieza es propia
-            //TODO: en modo anï¿½lisis no hace falta mirar que sea propia.
+            //TODO: en modo analisis no hace falta mirar que sea propia.
             if (!this.contiene()) {
                 active_div = null;
                 moviendo = false;
@@ -169,11 +169,11 @@ function createHexSpace(leftOffset, topOffset) {
             valido = $(this).hasClass("hex_esperar");
             apagarTodo();
 
-            if (valido) { //Es vï¿½lido si estï¿½ iluminado de esperar
+            if (valido) { //Es valido si esta iluminado de esperar
                 if (this.contiene() /*&& no es mi color*/ ) {
-                    //Esto serï¿½a un ataque, moverse a una celda ocupada que no es de mi color
+                    //Esto seria un ataque, moverse a una celda ocupada que no es de mi color
                     intentarAtaque(this.id, active_div.id);
-                } else { //Esto serï¿½a un movimiento a casilla vacï¿½a
+                } else { //Esto seria un movimiento a casilla vacia
                     apagarTodo();
                     id_origen = active_div.id;
 
@@ -292,6 +292,7 @@ function actualizarTablero() {
         tracear("error, estás logueado?")
     });
 }
+
 function montarMarcador(data){
 	marcador = new marcador(data.turno, data.jugadores);
     marcador.pintar();
@@ -328,7 +329,7 @@ function marcador(turno, datos) {
     }
 }
 
-function crearTablero(alto, ancho) {
+function crearEstructura(alto, ancho) {
     for (y = 0; y < alto; y++) {
         baseTopOffset = (y * 82) + 30;
         for (x = 0; x < ancho; x++) {
@@ -346,7 +347,7 @@ function crearTablero(alto, ancho) {
 function iniciarTablero() {
     filas = 21;
     columnas = 21;
-    crearTablero(filas, columnas);
+    crearEstructura(filas, columnas);
     $("#floorplan").css("width", columnas * 73 + 50);
     $("#floorplan").css("height", filas * 82 + 60);
     $("body").hide()
@@ -357,16 +358,16 @@ function vaciarTablero() {
     for(f in positions) {
     	$("#hex" + f)[0].vaciar();
     	positions[f]=null;
-        //eliminado = positions.pop();
-        //$("#" + eliminado)[0].limpiar();
     }
 }
+
+
 
 $(document).ready(
 function () {
 	pid= getUrlVars()["pid"];
 	if(pid==undefined) pid="13101446764654110462503";
 	tracear("partida: "+pid+"<br>");
-    iniciarTablero(); //pero en vacï¿½o
+    iniciarTablero(); //pero en vacio
     insertarTablero(); //recuperar json partida y rellenar las celdas
 });
