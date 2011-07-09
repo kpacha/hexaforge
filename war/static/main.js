@@ -24,7 +24,7 @@ color_jugador["4"] = "brown";
 id_jugador = "baterpruf";
 
 //simulaciï¿½n posiciï¿½n inicial tablero, la letra es la pieza y el nï¿½mero es el jugador
-var positions;
+var positions = [];
 //positions["12-1"]="r5";
 //positions["3-3"]="s3";
 //Comprobaciï¿½n paridad
@@ -224,24 +224,24 @@ function createHexSpace(leftOffset, topOffset) {
 }
 
 function intentarAtaque(id_origen, id_destino) {
-    tracear("atacando: " + id_origen + " hacia " + id_destino + "<br>");
-    $.get("hexagame", {
-        origen: id_origen,
-        destino: id_destino
+    tracear("atacando! ");
+    enviarMovimiento(id_origen, id_destino)
+};
+
+function enviarMovimiento(id_origen, id_destino) {
+    tracear("mover: " + id_origen + " hacia " + id_destino + "<br>");
+	orig=$("#"+id_origen)[0];
+	dest=$("#"+id_destino)[0];
+	jsonMensaje='{"turno":0, "origen": {"x": '+orig.x+', "y": '+orig.y+'}, "destino": {"x":'+dest.x+', "y":'+dest.y+'}}';
+	$.post("hexagame", {
+        m: jsonMensaje
     }, function (data) {
-        tracear("Respuesta: " + data);
-        //actualizar tablero, eso seguro
         actualizarTablero();
         if (true /*Si no se ha podido hacer el movimiento*/ ) {
             //Mostrar aviso del error. o si no devolver el error en el return.
         }
     });
-    return null;
-};
-
-function enviarMovimiento(id_origen, id_destino) {
-    tracear("enviar al servidor " + id_origen + " hacia " + id_destino + "<br>");
-    //actualizarTablero();
+    actualizarTablero();
     return null;
 }
 
@@ -263,17 +263,6 @@ function apagarTodo() {
     }
 }
 
-function actualizarTablero() {
-	url="hexagame?pid="+pid;
-	//url="hexagame.json";
-    $.getJSON(url, function (data) {
-        montarTablero(data)
-    }).error(function () {
-        tracear("error")
-    });
-    //$.getJSON("http://hexaforge.appspot.com/hexagame?pid=13079204655491091244048",function (data){montarTablero(data)});
-}
-
 function getUrlVars() {
 	var vars = {};
 	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -282,13 +271,35 @@ function getUrlVars() {
 	return vars;
 }
 
-function montarTablero(data) {
-    marcador = new marcador(data.turno, data.jugadores);
+function insertarTablero() {
+	url="hexagame?pid="+pid;
+	//url="hexagame.json";
+    $.getJSON(url, function (data) {
+    	montarMarcador(data)
+    	montarTablero(data)
+    }).error(function () {
+        tracear("error, estás logueado?")
+    });
+}
+
+function actualizarTablero() {
+	url="hexagame?pid="+pid;
+	//url="hexagamedani.json";
+    $.getJSON(url, function (data) {
+    	vaciarTablero();
+        montarTablero(data)
+    }).error(function () {
+        tracear("error, estás logueado?")
+    });
+}
+function montarMarcador(data){
+	marcador = new marcador(data.turno, data.jugadores);
     marcador.pintar();
     for (x in data.jugadores) {
         //tracear('Nombre:'+data.jugadores[x].name+'<br>');
     };
-    vaciarTablero();
+}
+function montarTablero(data) {
     for (v in data.tablero.celdas) {
         nombre = data.tablero.celdas[v].x + "-" + data.tablero.celdas[v].y
         valor = data.tablero.celdas[v].contenido + data.tablero.celdas[v].propietario;
@@ -299,10 +310,6 @@ function montarTablero(data) {
 
 function getPlayer() {
     return id_jugador;
-}
-
-function pintarMarcador() {
-    //$("#info").html('Nombre: <span style="background-color:green">'+getPlayer()+'</span> - Piezas: 4 - Turnos: 5 - <a href="#">Analizar</a> ------ Colores: <span style="background-color:blue">kandahar</span> - <span style="background-color:red">koco</span> - <span style="background-color:brown">kpacha</span> - <span style="background-color:pink">jj</span>');
 }
 
 function marcador(turno, datos) {
@@ -347,17 +354,19 @@ function iniciarTablero() {
 }
 
 function vaciarTablero() {
-    while (positions.length > 0) {
-        eliminado = positions.pop();
-        $("#" + eliminado)[0].limpiar();
+    for(f in positions) {
+    	$("#hex" + f)[0].vaciar();
+    	positions[f]=null;
+        //eliminado = positions.pop();
+        //$("#" + eliminado)[0].limpiar();
     }
 }
 
 $(document).ready(
 function () {
 	pid= getUrlVars()["pid"];
+	if(pid==undefined) pid="13101446764654110462503";
 	tracear("partida: "+pid+"<br>");
     iniciarTablero(); //pero en vacï¿½o
-    pintarMarcador(); //iniciar marcador
-    actualizarTablero(); //recuperar json partida y rellenar las celdas
+    insertarTablero(); //recuperar json partida y rellenar las celdas
 });
