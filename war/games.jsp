@@ -11,41 +11,27 @@
 
 <html>
   <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Hexaforge</title>
-	<link href="static/main.css" rel="stylesheet" type="text/css" />
+    <title>Game list</title>
+    <%
+	UserService userService = UserServiceFactory.getUserService();
+	User user = userService.getCurrentUser();
+	if (user != null) {
+	%>
+    <meta name="user" content="<%= user.getNickname() %>">
+    <meta name="authLink" content="<%= userService.createLogoutURL(request.getRequestURI()) %>">
+    <meta name="authLine" content="Logout">
+	<%
+	} else {
+	%>
+    <meta name="user" content="Annonymous">
+    <meta name="authLink" content="<%= userService.createLoginURL(request.getRequestURI()) %>">
+    <meta name="authLine" content="Login">
+	<%
+	}
+	%>
   </head>
 
   <body>
-
-<div id="header_container">
-  <div id="header">
-    <div id="logo">
-      <div id="login">
-<%
-UserService userService = UserServiceFactory.getUserService();
-User user = userService.getCurrentUser();
-if (user != null) {
-%>
-<p>Hola, <%= user.getNickname() %>!
-(<a href="<%= userService.createLogoutURL(request.getRequestURI()) %>">cerrar sesión</a>.)</p>
-<%
-} else {
-%>
-<p>Hola!
-<a href="<%= userService.createLoginURL(request.getRequestURI()) %>">Logueate</a>
-para continuar.</p>
-<%
-return;
-}
-%>
- 	  </div>
-    </div>
-    <%@include file='header.htm'%>
-  </div>
-</div>
-
-<%@include file='news.htm'%>
 
 <div id="bodymiddlePan">
   <h2>Listado partidas</h2>
@@ -105,8 +91,6 @@ pm.close();
 %>
 </ul>
 </div>
-
-<%@include file='footer.htm'%>
 
 </body>
 </html>

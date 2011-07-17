@@ -1,0 +1,9 @@
+<decorators>
+  <decorator name="default" page="/decorators/base.jsp">
+    <pattern>/*</pattern>
+  </decorator>
+  <decorator name="htmldecorator" page="/decorators/html.jsp">
+    <pattern>*.html</pattern>
+    <pattern>*.htm</pattern>
+  </decorator>
+</decorators>
