@@ -141,7 +141,8 @@ public class Game {
 
 	public void setPlayers(String j) {
 		players = j;
-		totPlayers = j.split("\\}, \\{").length;
+		JSONArray array = (JSONArray) JSONValue.parse(j);
+		totPlayers = array.size();
 		// System.out.print("Seteando jugadores desde String: "+j+"\n");
 	}
 
@@ -258,8 +259,8 @@ public class Game {
 		if (totPlayers != 0) {
 			pV = txt2Players(players);
 			if (pV.size() != totPlayers) {
-				 //System.out.print("Los totales no coinciden: " +totPlayers+
-				 //", " +pV.size()+ "\n"); // testing
+//				 System.out.print("Los totales no coinciden: " +totPlayers+
+//				      ", " +pV.size()+ "\n"); // testing
 				return false;
 			}
 		}
@@ -269,8 +270,8 @@ public class Game {
 						|| (color == ((Player) pV.elementAt(c)).getColor()))
 					return false;
 			}
-			//System.out.print("Player added. id: " +id+ ", name: " +name+
-			// ", color: " +color+ "\n"); // testing
+//			System.out.print("Player added. id: " +id+ ", name: " +name+
+//			 ", color: " +color+ "\n"); // testing
 			Player p = new Player(id, name, color);
 			pV.add(p);
 			if (pV.size() >= MIN_PLAYERS)
@@ -278,10 +279,10 @@ public class Game {
 			else
 				state = STATE_JOIN_GAME;
 			setPlayers(players2Txt(pV));
-			// System.out.print("-----------------------------------------------\n");
-			// System.out.print("Player added. totPlayers: " +totPlayers+ "\n");
-			// System.out.print("Player added. players: " +players+ "\n"); 
-			// System.out.print("-----------------------------------------------\n");
+//			System.out.print("-----------------------------------------------\n");
+//			System.out.print("Player added. totPlayers: " +totPlayers+ "\n");
+//			System.out.print("Player added. players: " +players+ "\n"); 
+//			System.out.print("-----------------------------------------------\n");
 			return true;
 		} else
 			return false;
@@ -364,9 +365,9 @@ public class Game {
 	 * Starts the game
 	 */
 	public boolean startGame() {
-		// System.out.print("-----------------------------------------------\n");
-		// System.out.print("Iniciando juego con " +totPlayers+ " jugadores\n");
-		// System.out.print("estado inicial : " +state+ "\n");
+//		System.out.print("-----------------------------------------------\n");
+//		System.out.print("Iniciando juego con " +totPlayers+ " jugadores\n");
+//		System.out.print("estado inicial : " +state+ "\n");
 		if (state == STATE_PREPARE_GAME && totPlayers != 0) {
 			// creamos tablero
 			Board b = new Board(MAX_CELLS);
@@ -377,21 +378,21 @@ public class Game {
 			}
 			board = b.serializeBoard();
 			// asignamos turnos iniciales
-			//System.out.print("\n-----------------------------------------------\n");
-			//System.out.print("startGame(): initialDeltaTurn=" + this.getGamePreferences().getInitialDeltaTurn());
-			//System.out.print("\npreferences=" + preferences);
-			//System.out.print("\n-----------------------------------------------\n");
+//			System.out.print("\n-----------------------------------------------\n");
+//			System.out.print("startGame(): initialDeltaTurn=" + this.getGamePreferences().getInitialDeltaTurn());
+//			System.out.print("\npreferences=" + preferences);
+//			System.out.print("\n-----------------------------------------------\n");
 			if (!addTurns(this.getGamePreferences().getInitialDeltaTurn())) {
-				// System.out.print("error iniciando los turnos de : " +id+
-				// "\n"); // testing
+				System.out.print("error iniciando los turnos de : " +id+
+				    "\n"); // testing
 				return false;
 			}
 			// programamos incremento turnos
 			nextCheck = (new Date()).getTime() + prefs.getEtaTurn();
 			state = STATE_PLAYING;
 		}
-		// System.out.print("estado final : " +state+ "\n"); 
-		// System.out.print("-----------------------------------------------\n");
+//		System.out.print("estado final : " +state+ "\n"); 
+//		System.out.print("-----------------------------------------------\n");
 		return state == STATE_PLAYING;
 	}
 
@@ -423,7 +424,7 @@ public class Game {
 		}
 		//guardar el nuevo tablero
 		board = b.serializeBoard();
-		System.out.print("Game.move: updated board = " + board + "\n");
+//		System.out.print("Game.move: updated board = " + board + "\n");
 		//incrementar turno de la partida
 		this.setTurn(this.getTurn() + 1);
 		//decrementar movimientos restantes al juagdor
