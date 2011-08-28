@@ -1,23 +1,27 @@
 package com.hexaforge.core;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 public class Hexagon {
 
 	private int x;
 	private int y;
 	protected char contenido;
+	private int propietario;
+	
+	public static final String fichas = "rtpls";
+	public static final int TIPOS_FICHAS = 5;
 
 	public Hexagon(String h) {
-		Hexagon hexagon = fromString(h);
-		this.setX(hexagon.getX());
-		this.setY(hexagon.getY());
-		this.setContenido(hexagon.getContenido());
-		// System.out.print("Hexagon: maquetando: ['"+x+"','"+y+"','"+contenido+"']\n");
+		fromString(h);
 	}
 
 	public Hexagon(int xPos, int yPos, char c) {
 		x = xPos;
 		y = yPos;
 		contenido = c;
+		propietario = -1;
 		// System.out.print("Hexagon: maquetando: ['"+x+"','"+y+"','"+contenido+"']\n");
 	}
 	
@@ -25,6 +29,7 @@ public class Hexagon {
 		this.setX(hexagon.getX());
 		this.setY(hexagon.getY());
 		this.setContenido(hexagon.getContenido());
+		this.setPropietario(hexagon.getPropietario());
 	}
 	
 	protected static final String extractValue(String v){
@@ -34,24 +39,59 @@ public class Hexagon {
 
 	@Override
 	public String toString() {
-		return "{\"x\":\"" + x + "\", \"y\":\"" + y + "\", \"contenido\":\""
-				+ contenido + "\"}";
+		return this.toJSON().toJSONString();
 	}
 	
-	public Hexagon fromString(String h) {
-		// System.out.print("Hexagon: maquetando: '"+h+"'\n");
-		// h = {"x":"0", "y":"0", "piece":"p", "player":"0"}
-		h = (String) h.subSequence(1, h.length() - 1);
-		String[] params = h.split(", ");
-		char contenido = extractValue(params[2]).charAt(0);
-		for (int i = 0; i < Piece.fichas.length(); i++) {
-			if (contenido == Piece.fichas.charAt(i)) {
-				return new Piece(h);
-			}
+	public JSONObject toJSON(){
+		JSONObject obj=new JSONObject();
+		obj.put("x", String.valueOf(this.getX()));
+		obj.put("y", String.valueOf(this.getY()));
+		obj.put("contenido", (this.getContenido() + " ").trim());
+		obj.put("propietario", String.valueOf(this.getPropietario()));
+		return obj;
+	}
+
+	public void fromString(String h) {
+		System.out.print("Hexagon: " + h + "\n");
+		JSONObject hex = (JSONObject) JSONValue.parse(h);
+		this.x = Integer.valueOf((String)hex.get("x"));
+		this.y = Integer.valueOf((String)hex.get("y"));
+		this.setContenido(((String)hex.get("contenido")).charAt(0));
+		this.setPropietario(Integer.valueOf((String)hex.get("propietario")));
+		System.out.print("Hexagon: parsed as " + this + "\n");
+	}
+	
+	/**
+	 * Calcula la distancia entre la celda y las coordenadas recibidas
+	 * 
+	 * @param int toX
+	 * @param int toY
+	 * @return int
+	 */
+	public int getDistanceTo(int toX, int toY) {
+		int dx = Math.abs(this.getX() - toX);
+		int dy = Math.abs(this.getY() - toY);
+		int distance = 0;
+
+		if (dx/2 >= dy) {
+		      distance = dx;
+		} else {
+		      distance = (int) (dy + dx - Math.floor(dx/2.0)); 
 		}
-		int x = Integer.parseInt(extractValue(params[0]));
-		int y = Integer.parseInt(extractValue(params[1]));
-		return new Obstacle(x, y, contenido);
+		if (this.getX() % 2 == 0) {
+		      if (dx % 2 == 1 && this.getY() > toY) {
+		            distance--;
+		      }
+		} else {
+		      if (dx % 2 == 1 && this.getY() < toY) {
+		            distance--;
+		      }
+		}
+		return distance;
+	}
+	
+	public boolean isPiece() {
+		return Piece.fichas.indexOf(this.getContenido()) > -1;
 	}
 
 	public final int getX() {
@@ -67,6 +107,20 @@ public class Hexagon {
 	 */
 	public final char getContenido() {
 		return contenido;
+	}
+
+	/**
+	 * @return the propietario
+	 */
+	public final int getPropietario() {
+		return propietario;
+	}
+
+	/**
+	 * @param propietario the propietario to set
+	 */
+	public final void setPropietario(int propietario) {
+		this.propietario = propietario;
 	}
 
 	/**
@@ -88,5 +142,11 @@ public class Hexagon {
 	 */
 	public final void setContenido(char contenido) {
 		this.contenido = contenido;
+	}
+
+	public boolean move(int x, int y) {
+		this.setX(x);
+		this.setY(y);
+		return true;
 	}
 }

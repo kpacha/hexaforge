@@ -39,6 +39,7 @@ public class HexagameServlet extends HttpServlet {
 		}
 		if (pid != null) {
 			// System.out.print("mostrando partida\n");
+			resp.setContentType("text/x-json");
 			showGame(req, resp, pid);
 			return;
 		}
@@ -52,10 +53,9 @@ public class HexagameServlet extends HttpServlet {
 		if ((user = checkUser(req, resp)) == null) {
 			return;
 		}
-		resp.setContentType("text/x-json");
 		String accion = req.getParameter("aid");
 		if (accion == null) {
-			// System.out.print("redireccionando petición incompleta\n"); 
+			System.out.print("redireccionando petición incompleta\n"); 
 			doGet(req, resp);
 			return;
 		}
@@ -71,11 +71,15 @@ public class HexagameServlet extends HttpServlet {
 			game = pm.getObjectById(Game.class, k);		
 			GameController controller = new GameController(game, pm);
 			if(!controller.execute(accion, user, req.getParameter("m"))){
-				resp.sendRedirect("/error.html");
+				//resp.sendRedirect("/error.html");
+				resp.sendError(500, "Error al procesar la petición");
 				return;
 			}else{
 				if(accion.equalsIgnoreCase("start")){
 					resp.sendRedirect("/tablero.html?pid=" + game.getId());
+				} else if(accion.equalsIgnoreCase("move")){
+					resp.getWriter().println(resp.SC_OK);
+					return;
 				}
 			}
 		}catch(NucleusObjectNotFoundException e){
@@ -83,18 +87,19 @@ public class HexagameServlet extends HttpServlet {
 			System.out.print("\nError en la recuperación de la partida : "
 					+ e.getMessage() +"\n");
 			return;
-		}catch(Exception e){
-			resp.sendRedirect("/error.html");
-			System.out.print("\nError en la utilización del GameController: "
-					+ e.getMessage() +"\n");
-			System.out.print("\nmás info: "
-					+ e.getCause() +"\n");
-			System.out.print("\nm: "
-					+ req.getParameter("m") +"\n");
-			return;
+//		}catch(Exception e){
+//			resp.sendRedirect("/error.html");
+//			System.out.print("\nError en la utilización del GameController: "
+//					+ e.getMessage() +"\n");
+//			System.out.print("\nmás info: "
+//					+ e.getCause() +"\n");
+//			System.out.print("\nm: "
+//					+ req.getParameter("m") +"\n");
+//			return;
 		}finally{
 			pm.close();
-		}		
+		}
+		resp.setContentType("text/x-json");
 		game.sendUpdateToClients();
 		resp.getWriter().println(game.toString());
 	}

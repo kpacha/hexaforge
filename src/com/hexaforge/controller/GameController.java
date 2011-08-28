@@ -33,39 +33,41 @@ public class GameController {
 	 * @return
 	 */
 	public boolean execute(String methodName, Object...args){
-		//System.out.print("\nHexagameController: llamando a la accion " + methodName
-		//		+ " con [" + args.length + "] parámetros." );
+		System.out.print("\nHexagameController: llamando a la accion " + methodName
+				+ " con [" + args.length + "] parámetros.\n" );
 		return this.reflector.executeMethod(methodName, args).equals(true);
 	}
 	
 	private boolean finalizeAction(boolean success){
-		//System.out.print("\nHexagameController: resultado accion " + success);
+		System.out.print("\nHexagameController: resultado accion " + success);
 		if(success){
 			this.pm.makePersistent(game);
-			//System.out.print(" así que se han guardado los cambios!");
+			System.out.print(" así que se han guardado los cambios!\n");
 			return true;
 		} 
 		return false;
 	}
 	
 	private boolean create(User user){
-		return finalizeAction(game.addPlayer(user.getUserId(), user.getNickname()));
+		return this.finalizeAction(game.addPlayer(user.getUserId(), user.getNickname()));
 	}
 	
 	private boolean join(User user){
-		return finalizeAction(game.addPlayer(user.getUserId(), user.getNickname()));
+		return this.finalizeAction(game.addPlayer(user.getUserId(), user.getNickname()));
 	}
 	
 	private boolean quit(User user){
-		return finalizeAction(game.delPlayer(user.getNickname()));
+		return this.finalizeAction(game.delPlayer(user.getNickname()));
 	}
 	
 	private boolean start(User user){
-		return finalizeAction(game.startGame());
+		return this.finalizeAction(game.startGame());
 	}
 	
 	private boolean move(User user, String movementString){
-		return finalizeAction(game.move(user.getUserId(), movementString));
+		System.out.print("\nHexagameController: entrando a la accion move con ["
+				+ user + "] y [" + movementString + "] como parámetros.\n" );
+		return this.finalizeAction(game.move(user.getUserId(), movementString));
 	}
 
 }

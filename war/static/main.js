@@ -6,6 +6,7 @@ var positions = new Array();
 var moviendo = false;
 var pieza_moviendo = "";
 var rango = 1; //La distancia que se puede mover.
+var turno = 0;
 //rutas imagenes para piezas
 var clase_pieza = new Array();
 clase_pieza["r"] = "rock";
@@ -142,6 +143,7 @@ function createHexSpace(leftOffset, topOffset) {
     });
     $(divTag).click(function () {
         //limpiar todos los fondos
+    	//TODO: revisar si le quedan turnos disponibles al jugador (el server ya lo hace)
         if (!moviendo) {
             apagarTodo();
             //si no es movimiento correcto abortamos movimiento y salimos
@@ -232,15 +234,21 @@ function enviarMovimiento(id_origen, id_destino) {
     tracear("mover: " + id_origen + " hacia " + id_destino + "<br>");
 	orig=$("#"+id_origen)[0];
 	dest=$("#"+id_destino)[0];
-	jsonMensaje='{"turno":0, "origen": {"x": '+orig.x+', "y": '+orig.y+'}, "destino": {"x":'+dest.x+', "y":'+dest.y+'}}';
-	$.post("hexagame", {
-        m: jsonMensaje
-    }, function (data) {
-        actualizarTablero();
-        if (true /*Si no se ha podido hacer el movimiento*/ ) {
-            //Mostrar aviso del error. o si no devolver el error en el return.
-        }
-    });
+	jsonMensaje='{"turno": "' + turno + '", "origen": {"x": '+orig.x+', "y": '+orig.y+'}, "destino": {"x": '+dest.x+', "y": '+dest.y+'}}';
+	$.post(
+		"hexagame",
+		{
+	        m: jsonMensaje,
+	        aid: "move",
+	        pid: pid
+		},
+		function (data) {
+	        actualizarTablero();
+	        if (true /*Si no se ha podido hacer el movimiento*/ ) {
+	            //Mostrar aviso del error. o si no devolver el error en el return.
+	        }
+		}
+	);
     actualizarTablero();
     return null;
 }
@@ -275,10 +283,11 @@ function insertarTablero() {
 	url="hexagame?pid="+pid;
 	//url="hexagame.json";
     $.getJSON(url, function (data) {
+    	turno = data.turno;
     	montarMarcador(data)
     	montarTablero(data)
     }).error(function () {
-        tracear("error, est·s logueado?")
+        tracear("error, est√°s logueado?" + data)
     });
 }
 
@@ -286,10 +295,11 @@ function actualizarTablero() {
 	url="hexagame?pid="+pid;
 	//url="hexagamedani.json";
     $.getJSON(url, function (data) {
+    	turno = data.turno;
     	vaciarTablero();
         montarTablero(data)
     }).error(function () {
-        tracear("error, est·s logueado?")
+        tracear("error, est√°s logueado?" + data)
     });
 }
 

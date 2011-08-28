@@ -16,11 +16,11 @@ public class Reflector {
 		Class<?>[] t= new Class[args.length];
 		Object[] arguments = new Object[args.length];
 		for(int i=0; i<args.length; i++){
-			//System.out.print("\nReflector: argumento ["+i+"]");
+			System.out.print("\nReflector: argumento ["+i+"]");
 			try{
 				t[i] = args[i].getClass();
 			}catch(NullPointerException e){
-				//System.out.print(" es nulo! Reduciendo el array de argumentos");
+				System.out.print(" es nulo! Reduciendo el array de argumentos");
 				Class<?>[] tmp = new Class[i];
 				arguments = new Object[i];
 				for(int j=0; j<i; j++){
@@ -33,7 +33,7 @@ public class Reflector {
 				args = arguments;
 				break;
 			}
-			//System.out.print(" del tipo " + t[i]);
+			System.out.print(" del tipo " + t[i]);
 		}
 		return method(methodName)
 				.withParameterTypes(t)

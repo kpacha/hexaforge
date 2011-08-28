@@ -1,4 +1,7 @@
 <decorators>
+  <decorator name="exclude" page="/decorators/none.jsp">
+    <pattern>/_ah/admin/*</pattern>
+  </decorator>
   <decorator name="default" page="/decorators/base.jsp">
     <pattern>/*</pattern>
   </decorator>

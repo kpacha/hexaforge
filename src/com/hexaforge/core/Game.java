@@ -12,6 +12,10 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.JSONArray;
+
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
@@ -202,11 +206,23 @@ public class Game {
 	
 	public Player getPlayer(String userId) {
 		for(Player p : this.txt2Players(players)) {
-			if (p.getId() == userId) {
+			System.out.print("Game.getPlayer() - checking if the player [" 
+					+ p.getId() + "] is the requested one [" + userId + "]\n");
+			if (p.getId().equalsIgnoreCase(userId)) {
 				return p;
 			}
 		}
 		return null;
+	}
+	
+	protected int getPlayerIndex(Player p) {
+		Vector<Player> players = this.txt2Players(this.players);
+		for(int i=0; i< players.size(); i++) {
+			if (p.getId().equalsIgnoreCase(players.get(i).getId())) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	public long getCreated() {
@@ -323,29 +339,19 @@ public class Game {
 	}
 
 	private String players2Txt(Vector<Player> player) {
-		String result = "[";
+		JSONArray list = new JSONArray();
 		for (int i = 0; i < player.size(); i++) {
 			Player p = (Player) player.get(i);
-			result += p.toString();
-			if (i < player.size() - 1) {
-				result += ", ";
-			}
+			list.add(p.toString());
 		}
-		result += "]";
-		// System.out.print("getJugadoresTxt() : " +result+ "\n"); // testing
-		return result;
+		return list.toJSONString();
 	}
 
 	private Vector<Player> txt2Players(String j) {
+		JSONArray array = (JSONArray) JSONValue.parse(j);
 		Vector<Player> v = new Vector<Player>();
-		j = (String) j.subSequence(1, j.length() - 1);
-		String[] p = j.split("\\}, \\{");
-		for (int i = 0; i < p.length; i++) {
-			if (i == 0)
-				p[i] = (String) p[i].subSequence(1, p[i].length());
-			if (i == p.length - 1)
-				p[i] = (String) p[i].subSequence(0, p[i].length() - 1);
-			v.add(new Player(p[i]));
+		for (int i = 0; i < array.size(); i++) {
+			v.add(new Player(array.get(i).toString()));
 		}
 		return v;
 	}
@@ -385,13 +391,61 @@ public class Game {
 		return state == STATE_PLAYING;
 	}
 
+	/**
+	 * Procesado del movimiento
+	 * 
+	 * Valida si al jugador pertenece a la partida, si le quedan movimientos por gastar
+	 * y si tiene el tablero actualizado. Si todo está correcto, le pasa el movimiento al tablero.
+	 * 
+	 * @param String userId
+	 * @param String m
+	 * @return boolean
+	 */
 	public boolean move(String userId, String m) {
-		Player p = this.getPlayer(userId);
-		if (p.getTurns() > 0) {
-			Board b = new Board(board);
-			return b.move(p, m);
+		Player player;
+
+		JSONObject obj = (JSONObject) JSONValue.parse(m);
+		int lastTurn = Integer.valueOf((String)obj.get("turno"));
+		JSONObject fromCell = (JSONObject) obj.get("origen");
+		JSONObject toCell = (JSONObject) obj.get("destino");
+		
+		//validar movimiento
+		if ((player = this.isValidMovement(userId, lastTurn)) == null){
+			return false;
 		}
-		return false;
+		Board b = new Board(board);
+		if (!b.move(this.getPlayerIndex(player), fromCell, toCell)) {
+			return false;
+		}
+		//guardar el nuevo tablero
+		board = b.serializeBoard();
+		System.out.print("Game.move: updated board = " + board + "\n");
+		//incrementar turno de la partida
+		this.setTurn(this.getTurn() + 1);
+		//decrementar movimientos restantes al juagdor
+		this.decreasePlayerTurns(this.getPlayerIndex(player));
+		return true;
+	}
+	
+	protected Player isValidMovement(String userId, int lastTurn) {
+		Player player = this.getPlayer(userId);
+		if (player.equals(null)) {
+			System.out.print("El usuario [" + userId + "] no participa en la partida [" + this.getId() +"]\n");
+			return null;
+		}
+
+		if (!player.canMove()) {
+			System.out.print("Game.move Player no tiene turnos disponibles. player.turns="
+					+ player.getTurns() + "\n");
+			return null;
+		}
+		
+		if (this.turn != lastTurn) {
+			System.out.print("Game.move Player no tiene el tablero actualizado. player.turns="
+					+ lastTurn + " != " + this.turn + "\n");
+			return null;
+		}
+		return player;
 	}
 
 	public boolean isJoinable() {
@@ -419,6 +473,13 @@ public class Game {
 		// System.out.print("addTurns(t) post:-> t=" +t+
 		// ". Total: "+pV.size()+"/"+totPlayers+"\n"); // testing
 		return (totPlayers == pV.size());
+	}
+	
+	protected boolean decreasePlayerTurns(int i){
+		Vector<Player> pV = txt2Players(players);
+		pV.get(i).wasteTurn();
+		setPlayers(players2Txt(pV));
+		return true;
 	}
 
 	private int rnd(int max) {
