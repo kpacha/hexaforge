@@ -59,6 +59,7 @@ if(g.getId() != null){
 		<li>Jugadores: <%= g.getPlayers() %></li>
 		<li>Tablero: <%= g.getBoard() %></li>
 		<li>Turnos realizados: <%= g.getTurn() %></li>
+		<li>Tablero: <a href="/tablero.html?pid=<%= g.getId() %>" target="_blank">Ir al tablero</a></li>
 		<% 
 		if(g.isJoinable()) {
 		%>
