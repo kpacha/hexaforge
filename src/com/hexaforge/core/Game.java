@@ -373,8 +373,12 @@ public class Game {
 			Board b = new Board(MAX_CELLS);
 			for (int i = 0; i < totPlayers; i++) {
 				// asignamos posiciones iniciales
-				b.addCell(new Piece(rnd(MAX_CELLS), rnd(MAX_CELLS),
-						Piece.fichas.charAt(rnd(Piece.TIPOS_FICHAS)), i));
+				for(int j = 0; j < this.getGamePreferences().getInitialDeltaTurn(); j++){
+					b.addCell(new Hexagon(rnd(MAX_CELLS), rnd(MAX_CELLS),
+							Hexagon.fichas.charAt(rnd(Piece.TIPOS_FICHAS)), i));
+//					b.addCell(new Piece(rnd(MAX_CELLS), rnd(MAX_CELLS),
+//							Piece.fichas.charAt(rnd(Piece.TIPOS_FICHAS)), i));
+				}
 			}
 			board = b.serializeBoard();
 			// asignamos turnos iniciales

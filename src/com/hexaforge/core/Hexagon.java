@@ -17,12 +17,16 @@ public class Hexagon {
 		fromString(h);
 	}
 
-	public Hexagon(int xPos, int yPos, char c) {
+	public Hexagon(int xPos, int yPos, char c, int p) {
 		x = xPos;
 		y = yPos;
 		contenido = c;
-		propietario = -1;
+		propietario = p;
 		// System.out.print("Hexagon: maquetando: ['"+x+"','"+y+"','"+contenido+"']\n");
+	}
+
+	public Hexagon(int xPos, int yPos, char c) {
+		this(xPos, yPos, c, -1);
 	}
 	
 	public Hexagon(Hexagon hexagon) {
