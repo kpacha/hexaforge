@@ -339,12 +339,16 @@ public class Game {
 	}
 
 	private String players2Txt(Vector<Player> player) {
+		return this.players2JSON(player).toJSONString();
+	}
+
+	private JSONArray players2JSON(Vector<Player> player) {
 		JSONArray list = new JSONArray();
 		for (int i = 0; i < player.size(); i++) {
 			Player p = (Player) player.get(i);
-			list.add(p.toString());
+			list.add(p.toJSON());
 		}
-		return list.toJSONString();
+		return list;
 	}
 
 	private Vector<Player> txt2Players(String j) {
