@@ -6,6 +6,7 @@ import javax.jdo.PersistenceManager;
 import javax.servlet.http.*;
 
 import org.datanucleus.exceptions.NucleusObjectNotFoundException;
+import org.json.simple.JSONObject;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -70,17 +71,21 @@ public class HexagameServlet extends HttpServlet {
 		try {
 			game = pm.getObjectById(Game.class, k);		
 			GameController controller = new GameController(game, pm);
-			if(!controller.execute(accion, user, req.getParameter("m"))){
-				//resp.sendRedirect("/error.html");
-				resp.sendError(500, "Error al procesar la petición");
-				return;
+			boolean success;
+			if(!(success = controller.execute(accion, user, req.getParameter("m")))){
+				if(!accion.equalsIgnoreCase("move")){
+					//resp.sendRedirect("/error.html");
+					resp.sendError(500, "Error al procesar la petición");
+					return;
+				}
 			}else{
 				if(accion.equalsIgnoreCase("start")){
 					resp.sendRedirect("/tablero.html?pid=" + game.getId());
-				} else if(accion.equalsIgnoreCase("move")){
-					resp.getWriter().println(resp.SC_OK);
-					return;
 				}
+			}
+			if(accion.equalsIgnoreCase("move")){
+				this.sendJSONResponse(req, resp, success);
+				return;
 			}
 		}catch(NucleusObjectNotFoundException e){
 			resp.sendRedirect("/error.html");
@@ -161,4 +166,16 @@ public class HexagameServlet extends HttpServlet {
 		}
 	}
 
+	private void sendJSONResponse(HttpServletRequest req, HttpServletResponse resp, boolean success){
+		JSONObject obj=new JSONObject();
+		obj.put("success", success);
+		resp.setContentType("text/x-json");
+		try {
+			resp.getWriter().println(obj.toJSONString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return;
+	}
 }

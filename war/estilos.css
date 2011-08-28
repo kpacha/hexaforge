@@ -5,6 +5,10 @@
 	height:25;
 	background-color:#333333;
 	color:#FFFFFF;
+	padding: 5px;
+}
+#info span{
+	padding: 8px;
 }
 #floorplan {
     /*background-image: url(static/ultima_hexmap.jpg);*/

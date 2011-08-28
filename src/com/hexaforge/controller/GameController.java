@@ -12,6 +12,7 @@ public class GameController {
 	private Game game;
 	private PersistenceManager pm;
 	private Reflector reflector;
+	private String lastError;
 
 	/**
 	 * 
@@ -21,6 +22,7 @@ public class GameController {
 		this.game = game;
 		this.reflector = new Reflector(this);
 		this.pm = pm;
+		this.lastError = null;
 	}
 	
 	/**
@@ -37,7 +39,7 @@ public class GameController {
 				+ " con [" + args.length + "] parámetros.\n" );
 		return this.reflector.executeMethod(methodName, args).equals(true);
 	}
-	
+	//TODO gestionar la respuesta de los métodos con excepciones para poder enviar mensajes de error
 	private boolean finalizeAction(boolean success){
 		System.out.print("\nHexagameController: resultado accion " + success);
 		if(success){
@@ -68,6 +70,20 @@ public class GameController {
 		System.out.print("\nHexagameController: entrando a la accion move con ["
 				+ user + "] y [" + movementString + "] como parámetros.\n" );
 		return this.finalizeAction(game.move(user.getUserId(), movementString));
+	}
+
+	/**
+	 * @return the lastError
+	 */
+	public final String getLastError() {
+		return lastError;
+	}
+
+	/**
+	 * @param lastError the lastError to set
+	 */
+	public final void setLastError(String lastError) {
+		this.lastError = lastError;
 	}
 
 }

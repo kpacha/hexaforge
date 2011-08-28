@@ -143,7 +143,6 @@ function createHexSpace(leftOffset, topOffset) {
     });
     $(divTag).click(function () {
         //limpiar todos los fondos
-    	//TODO: revisar si le quedan turnos disponibles al jugador (el server ya lo hace)
         if (!moviendo) {
             apagarTodo();
             //si no es movimiento correcto abortamos movimiento y salimos
@@ -243,13 +242,12 @@ function enviarMovimiento(id_origen, id_destino) {
 	        pid: pid
 		},
 		function (data) {
-	        actualizarTablero();
-	        if (true /*Si no se ha podido hacer el movimiento*/ ) {
-	            //Mostrar aviso del error. o si no devolver el error en el return.
+			if (!data.success) {
+				tracear("Error: no se ha podido procesar el movimiento<br>");
 	        }
+			actualizarTablero();
 		}
 	);
-    actualizarTablero();
     return null;
 }
 
@@ -281,34 +279,32 @@ function getUrlVars() {
 
 function insertarTablero() {
 	url="hexagame?pid="+pid;
-	//url="hexagame.json";
     $.getJSON(url, function (data) {
     	turno = data.turno;
     	montarMarcador(data)
     	montarTablero(data)
     }).error(function () {
-        tracear("error, estás logueado?" + data)
+        tracear("error, estás logueado?")
     });
 }
 
 function actualizarTablero() {
 	url="hexagame?pid="+pid;
-	//url="hexagamedani.json";
     $.getJSON(url, function (data) {
     	turno = data.turno;
     	vaciarTablero();
-        montarTablero(data)
+        montarTablero(data);
+        montarMarcador(data);
     }).error(function () {
-        tracear("error, estás logueado?" + data)
+        tracear("error, estás logueado?")
     });
 }
 
 function montarMarcador(data){
-	marcador = new marcador(data.turno, data.jugadores);
-    marcador.pintar();
-    for (x in data.jugadores) {
-        //tracear('Nombre:'+data.jugadores[x].name+'<br>');
-    };
+	pintaMarcador(data.turno, data.jugadores);
+//    for (x in data.jugadores) {
+//        //tracear('Nombre:'+data.jugadores[x].name+'<br>');
+//    };
 }
 function montarTablero(data) {
     for (v in data.tablero.celdas) {
@@ -323,20 +319,18 @@ function getPlayer() {
     return id_jugador;
 }
 
-function marcador(turno, datos) {
+function pintaMarcador(turno, datos) {
     this.turno = turno;
     this.datos = datos;
-    $("#info").html("");
-    this.pintar = function () {
-        for (x in this.datos) {
-            tracear('Nombre:' + this.datos[x].name + '<br>');
-            $("#info").html($("#info").html() + '<span style="background-color:' + color_jugador[this.datos[x].color] + '">' + this.datos[x].name + "</span> ");
-        };
-    }
-    this.actualizar = function (turno, datos) {
-        this.turno = turno;
-        this.datos = datos;
-    }
+    $("#info").html('<span>' + turno + "</span>");
+    for (x in this.datos) {
+        tracear('Nombre:' + this.datos[x].name + '<br>');
+        $("#info").html(
+       		$("#info").html() + '<span style="background-color:'
+       		+ color_jugador[this.datos[x].color] + '">'
+       		+ this.datos[x].name + " (" + this.datos[x].turns + ")</span> "
+        );
+    };
 }
 
 function crearEstructura(alto, ancho) {
