@@ -77,7 +77,6 @@ public class GameController {
 		int initialDeltaTurn = parameter2Int("idt", parameters);
 		int deltaTrun = parameter2Int("dt", parameters);
 		int etaTurn = parameter2Int("et", parameters);
-//		int boardType = parameter2Int("bt", parameters);
 		String boardType = parameters.get("bt")[0];
 		int sizeX = parameter2Int("sx", parameters);
 		int sizeY = parameter2Int("sy", parameters);
@@ -98,8 +97,9 @@ public class GameController {
 		game.move(user.getNickname(), turn, fromX, fromY, toX, toY);
 		return game;
 	}
-	
-	protected static int parameter2Int(String paramName, Map<String, String[]> parameters){
+
+	protected static int parameter2Int(String paramName,
+			Map<String, String[]> parameters) {
 		return Integer.parseInt(parameters.get(paramName)[0]);
 	}
 }

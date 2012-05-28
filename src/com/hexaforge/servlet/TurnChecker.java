@@ -60,6 +60,8 @@ public class TurnChecker extends HttpServlet {
 			}
 		} catch (Exception e) {
 			LOGGER.warning(e.getMessage());
+		} finally {
+			entityManager.close();
 		}
 	}
 }
