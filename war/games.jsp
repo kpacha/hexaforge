@@ -2,14 +2,15 @@
 <%@ page import="java.text.DateFormat" %>
 <%@ page import="java.util.Date" %>
 <%@ page import="java.util.List" %>
-<%@ page import="javax.jdo.PersistenceManager" %>
+<%@ page import="javax.persistence.EntityManager" %>
+<%@ page import="javax.persistence.Query" %>
 <%@ page import="com.google.appengine.api.users.User" %>
 <%@ page import="com.google.appengine.api.users.UserService" %>
 <%@ page import="com.google.appengine.api.users.UserServiceFactory" %>
 <%@ page import="com.hexaforge.core.decorator.JsonDecorator" %>
 <%@ page import="com.hexaforge.entity.GameEntity" %>
 <%@ page import="com.hexaforge.core.interfaces.GameInterface" %>
-<%@ page import="com.hexaforge.util.PMF" %>
+<%@ page import="com.hexaforge.util.EMF" %>
 
 <html>
   <head>
@@ -31,9 +32,10 @@
 	<h2>Listado partidas</h2>
 	  
 	<%
-	PersistenceManager pm = PMF.get().getPersistenceManager();
-	String query = "select from " + GameEntity.class.getName() + " order by nextCheck asc range 0,10";
-	List<GameEntity> games = (List<GameEntity>) pm.newQuery(query).execute();
+	EntityManager entityManager = EMF.getEntityManager();
+		Query queryGames = entityManager
+				.createQuery("SELECT game FROM GameEntity game ORDER BY game.nextCheck DESC, game.status ASC");
+	List<GameEntity> games = queryGames.getResultList();
 	if (games.isEmpty()) {
 	%>
 		<p>No hay partidas.</p>
@@ -73,7 +75,7 @@
 					<%
 					} else {
 					%>
-					<	li>Partida finalizada!</li>
+						<li>Partida finalizada!</li>
 					<%
 					}
 					%>
@@ -87,7 +89,7 @@
 		</div>
 	<%
 	}
-	pm.close();
+	entityManager.close();
 }
 %>
 
