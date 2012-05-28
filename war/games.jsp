@@ -32,12 +32,11 @@
 	  
 	<%
 	PersistenceManager pm = PMF.get().getPersistenceManager();
-	//String query = "select from " + GameEntity.class.getName() + " order by nextCheck asc range 0,10";
-	String query = "select from " + GameEntity.class.getName() + " range 0,10";
+	String query = "select from " + GameEntity.class.getName() + " order by nextCheck asc range 0,10";
 	List<GameEntity> games = (List<GameEntity>) pm.newQuery(query).execute();
 	if (games.isEmpty()) {
 	%>
-	<p>No hay partidas.</p>
+		<p>No hay partidas.</p>
 	<%
 	} else {
 	%>
