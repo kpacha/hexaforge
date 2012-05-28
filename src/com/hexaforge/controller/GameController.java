@@ -1,89 +1,105 @@
 package com.hexaforge.controller;
 
-import javax.jdo.PersistenceManager;
+import java.util.Map;
 
+import javax.persistence.EntityManager;
+
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.User;
 import com.hexaforge.core.Game;
 import com.hexaforge.core.GamePreferences;
-import com.hexaforge.util.PMF;
-import com.hexaforge.util.Reflector;
+import com.hexaforge.core.decorator.JsonDecorator;
+import com.hexaforge.core.interfaces.GameInterface;
+import com.hexaforge.entity.GameEntity;
 
 public class GameController {
-	private Game game;
-	private PersistenceManager pm;
-	private Reflector reflector;
-	private String lastError;
 
-	/**
-	 * 
-	 * @param game
-	 */
-	public GameController(Game game, PersistenceManager pm) {
-		this.game = game;
-		this.reflector = new Reflector(this);
-		this.pm = pm;
-		this.lastError = null;
-	}
-	
-	/**
-	 * Método encargado de 'redirigir' las acciones
-	 * 
-	 * Utilizando la clase Reflector accede a los métodos del propio controlador
-	 * 
-	 * @param methodName
-	 * @param args
-	 * @return
-	 */
-	public boolean execute(String methodName, Object...args){
-		System.out.print("\nHexagameController: llamando a la accion " + methodName
-				+ " con [" + args.length + "] parámetros.\n" );
-		return this.reflector.executeMethod(methodName, args).equals(true);
-	}
-	//TODO gestionar la respuesta de los métodos con excepciones para poder enviar mensajes de error
-	private boolean finalizeAction(boolean success){
-		System.out.print("\nHexagameController: resultado accion " + success);
-		if(success){
-			this.pm.makePersistent(game);
-			System.out.print(" así que se han guardado los cambios!\n");
-			return true;
-		} 
-		return false;
-	}
-	
-	private boolean create(User user){
-		return this.finalizeAction(game.addPlayer(user.getUserId(), user.getNickname()));
-	}
-	
-	private boolean join(User user){
-		return this.finalizeAction(game.addPlayer(user.getUserId(), user.getNickname()));
-	}
-	
-	private boolean quit(User user){
-		return this.finalizeAction(game.delPlayer(user.getNickname()));
-	}
-	
-	private boolean start(User user){
-		return this.finalizeAction(game.startGame());
-	}
-	
-	private boolean move(User user, String movementString){
-		System.out.print("\nHexagameController: entrando a la accion move con ["
-				+ user + "] y [" + movementString + "] como parámetros.\n" );
-		return this.finalizeAction(game.move(user.getUserId(), movementString));
+	private EntityManager entityManager;
+	private JsonDecorator game2Json;
+	private GameEntity gameEntity;
+
+	public GameController(EntityManager entityManager) {
+		this.entityManager = entityManager;
+		this.game2Json = JsonDecorator.getInstance();
 	}
 
-	/**
-	 * @return the lastError
-	 */
-	public final String getLastError() {
-		return lastError;
+	public void setGameEntity(String pid) throws Exception {
+		if (pid == null) {
+			gameEntity = new GameEntity();
+		} else {
+			gameEntity = entityManager
+					.find(GameEntity.class,
+							KeyFactory.createKey(
+									GameEntity.class.getSimpleName(), pid));
+		}
+		if (gameEntity == null) {
+			throw new Exception("Unknown gid [" + pid + "]");
+		}
 	}
 
-	/**
-	 * @param lastError the lastError to set
-	 */
-	public final void setLastError(String lastError) {
-		this.lastError = lastError;
+	public String getUpdatedSerializedGame() {
+		return gameEntity.getGame();
 	}
 
+	public boolean doAction(String action, User user,
+			Map<String, String[]> parameterMap) throws Exception {
+		boolean success = false;
+		GameInterface game;
+		try {
+			if (action.equalsIgnoreCase("new")) {
+				game = newGame(parameterMap, user);
+			} else {
+				game = game2Json.deserializeGame(gameEntity.getGame());
+				if (action.equalsIgnoreCase("join"))
+					game.addPlayer(user.getNickname());
+				else if (action.equalsIgnoreCase("start"))
+					game.startGame();
+				else if (action.equalsIgnoreCase("move"))
+					game = move(parameterMap, user, game);
+				else
+					throw new Exception("Unknown action [" + action + "]");
+			}
+			gameEntity.setGame(game2Json.serializeGame(game));
+			gameEntity.setNextCheck(game.getNextCheck());
+			gameEntity.setStatus(game.getStatus());
+
+			entityManager.persist(gameEntity);
+			success = true;
+		} catch (Exception e) {
+			System.out.println("Exception throwed!: " + e.getMessage());
+			throw e;
+		}
+		return success;
+	}
+
+	protected GameInterface newGame(Map<String, String[]> parameters, User user)
+			throws Exception {
+		int initialDeltaTurn = parameter2Int("idt", parameters);
+		int deltaTrun = parameter2Int("dt", parameters);
+		int etaTurn = parameter2Int("et", parameters);
+//		int boardType = parameter2Int("bt", parameters);
+		String boardType = parameters.get("bt")[0];
+		int sizeX = parameter2Int("sx", parameters);
+		int sizeY = parameter2Int("sy", parameters);
+
+		GameInterface game = new Game(new GamePreferences(initialDeltaTurn,
+				deltaTrun, etaTurn, boardType, sizeX, sizeY));
+		game.addPlayer(user.getNickname());
+		return game;
+	}
+
+	protected GameInterface move(Map<String, String[]> parameters, User user,
+			GameInterface game) throws Exception {
+		int fromX = parameter2Int("sx", parameters);
+		int fromY = parameter2Int("sy", parameters);
+		int toX = parameter2Int("tx", parameters);
+		int toY = parameter2Int("ty", parameters);
+		int turn = parameter2Int("turn", parameters);
+		game.move(user.getNickname(), turn, fromX, fromY, toX, toY);
+		return game;
+	}
+	
+	protected static int parameter2Int(String paramName, Map<String, String[]> parameters){
+		return Integer.parseInt(parameters.get(paramName)[0]);
+	}
 }

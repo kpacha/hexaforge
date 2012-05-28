@@ -11,14 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.hexaforge.core.Game;
+import com.hexaforge.core.decorator.JsonDecorator;
+import com.hexaforge.core.interfaces.GameInterface;
+import com.hexaforge.entity.GameEntity;
 import com.hexaforge.util.PMF;
 
 @SuppressWarnings("serial")
 public class TurnWorker extends HttpServlet {
-
-	private static final Logger log = Logger.getLogger(TurnWorker.class
-			.getName());
 
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
@@ -31,31 +30,38 @@ public class TurnWorker extends HttpServlet {
 		if (id == null) {
 			return;
 		}
-		Key k = KeyFactory.createKey(Game.class.getSimpleName(), id);
+		Key k = KeyFactory.createKey(GameEntity.class.getSimpleName(), id);
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game game;
+		GameInterface game;
+		GameEntity gameEntity;
 		try {
-			game = pm.getObjectById(Game.class, k);
+			gameEntity = pm.getObjectById(GameEntity.class, k);
+			game = JsonDecorator.getInstance().deserializeGame(gameEntity.getGame());
 		} catch (Exception e) {
-			log.warning("TurnWorker datastore reader error!");
+			System.out.println("TurnWorker datastore reader error!");
 			return;
 		}
 		long now = (new Date()).getTime();
 		if (now < game.getNextCheck()) {
-			log.warning("TurnWorker error: " + (game.getNextCheck() - now)
+			System.out.println("TurnWorker error: " + (game.getNextCheck() - now)
 					+ "ms. in advance!");
 			return;
 		}
-		if (game.addTurns(game.getGamePreferences().getDeltaTurn())) {
-			game.setNextCheck(game.getNextCheck() + game.getGamePreferences().getEtaTurn());
+		if (game.addTurns(game.getPreferences().getDeltaTurn())) {
+			game.setNextCheck(game.getNextCheck()
+					+ game.getPreferences().getEtaTurn());
 		} else {
-			log.warning("TurnWorker unknown error!");
+			System.out.println("TurnWorker unknown error!");
 			return;
 		}
 		try {
+			gameEntity.setGame(JsonDecorator.getInstance().serializeGame(game));
+			gameEntity.setNextCheck(game.getNextCheck());
+			gameEntity.setStatus(game.getStatus());
+			
 			pm.makePersistent(game);
 		} catch (Exception e) {
-			log.warning("TurnWorker datastore writer error!");
+			System.out.println("TurnWorker datastore writer error!");
 			return;
 		}
 		pm.close();

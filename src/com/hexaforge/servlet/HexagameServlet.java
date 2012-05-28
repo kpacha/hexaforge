@@ -2,180 +2,81 @@ package com.hexaforge.servlet;
 
 import java.io.IOException;
 
-import javax.jdo.PersistenceManager;
-import javax.servlet.http.*;
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.datanucleus.exceptions.NucleusObjectNotFoundException;
-import org.json.simple.JSONObject;
-
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.hexaforge.controller.GameController;
-import com.hexaforge.core.Game;
-import com.hexaforge.core.GamePreferences;
-import com.hexaforge.util.Channel;
-import com.hexaforge.util.PMF;
+import com.hexaforge.entity.GameEntity;
+import com.hexaforge.util.EMF;
 
-@SuppressWarnings("serial")
 public class HexagameServlet extends HttpServlet {
-	public void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
-		User user;
-		if ((user = checkUser(req, resp)) == null) {
-			return;
-		}
-		String accion = req.getParameter("aid");
-		String pid = req.getParameter("pid");
-		if (pid == null && accion != null && accion.equalsIgnoreCase("new")) {
-			// System.out.print("redireccionando al formulario de preferencias");
-			resp.sendRedirect("/preferences.jsp");			
-		}
-		if (pid != null && accion != null && accion.equalsIgnoreCase("join")) {
-			// System.out.print("uniendo a la partida");
-			doPost(req, resp);
-			return;			
-		}
-		if (pid != null) {
-			// System.out.print("mostrando partida\n");
-			resp.setContentType("text/x-json");
-			showGame(req, resp, pid);
-			return;
-		}
-		// System.out.print("redireccionando al listado de partidas\n");
-		resp.sendRedirect("/games.jsp");
-	}
+	private static final long serialVersionUID = 1L;
 
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
 		User user;
-		if ((user = checkUser(req, resp)) == null) {
-			return;
-		}
-		String accion = req.getParameter("aid");
-		if (accion == null) {
-			System.out.print("redireccionando petición incompleta\n"); 
+		String action = req.getParameter("aid");
+		if (action == null) {
+			System.out.println("Redirecting incomplete request");
 			doGet(req, resp);
 			return;
 		}
 		String pid = req.getParameter("pid");
-		if (pid == null && accion.equalsIgnoreCase("new")) {
-			newGame(req, resp, user);
+
+		EntityManager em = EMF.getEntityManager();
+		GameController controller;
+		try {
+			controller = new GameController(em);
+			user = checkUser(req, resp);
+			controller.setGameEntity(pid);
+			if (controller.doAction(action, user, req.getParameterMap()))
+				resp.getWriter().println(controller.getUpdatedSerializedGame());
+		} catch (Exception e) {
+			System.out.println("doPost Error: " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			em.close();
+		}
+	}
+
+	public void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws IOException {
+		String pid = req.getParameter("pid");
+		if (pid == null) {
+			System.out.println("Ending incomplete request");
 			return;
 		}
-		Key k = KeyFactory.createKey(Game.class.getSimpleName(), pid);
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game game;
+		EntityManager em = EMF.getEntityManager();
 		try {
-			game = pm.getObjectById(Game.class, k);		
-			GameController controller = new GameController(game, pm);
-			boolean success;
-			if(!(success = controller.execute(accion, user, req.getParameter("m")))){
-				if(!accion.equalsIgnoreCase("move")){
-					//resp.sendRedirect("/error.html");
-					resp.sendError(500, "Error al procesar la petición");
-					return;
-				}
-			}else{
-				if(accion.equalsIgnoreCase("start")){
-					resp.sendRedirect("/tablero.html?pid=" + game.getId());
-				}
-			}
-			if(accion.equalsIgnoreCase("move")){
-				this.sendJSONResponse(req, resp, success);
+			GameEntity ge = em
+					.find(GameEntity.class,
+							KeyFactory.createKey(
+									GameEntity.class.getSimpleName(), pid));
+			if (ge == null) {
+				System.out.println("Unknown gid " + pid);
 				return;
 			}
-		}catch(NucleusObjectNotFoundException e){
-			resp.sendRedirect("/error.html");
-			System.out.print("\nError en la recuperación de la partida : "
-					+ e.getMessage() +"\n");
-			return;
-//		}catch(Exception e){
-//			resp.sendRedirect("/error.html");
-//			System.out.print("\nError en la utilización del GameController: "
-//					+ e.getMessage() +"\n");
-//			System.out.print("\nmás info: "
-//					+ e.getCause() +"\n");
-//			System.out.print("\nm: "
-//					+ req.getParameter("m") +"\n");
-//			return;
-		}finally{
-			pm.close();
+			resp.getWriter().print(ge.getGame());
+		} catch (Exception e) {
+			System.out.println("doGet Error: " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			em.close();
 		}
-		resp.setContentType("text/x-json");
-		game.sendUpdateToClients();
-		resp.getWriter().println(game.toString());
 	}
 
 	private User checkUser(HttpServletRequest req, HttpServletResponse resp)
-			throws IOException {
+			throws Exception {
 		UserService userService = UserServiceFactory.getUserService();
 		User user = userService.getCurrentUser();
-		if (user == null) {
-			resp.getWriter().println(
-					"<p>Please <a href=\"" + userService.createLoginURL("/")
-							+ "\">sign in</a>.</p>");
-		}
+		if (user == null)
+			throw new Exception("Client is not logged in");
 		return user;
-	}
-	
-	private void newGame(HttpServletRequest req, HttpServletResponse resp, User user)
-			throws IOException {
-		String i, d, e;
-		i = req.getParameter("initialDeltaTurn");
-		d = req.getParameter("deltaTurn");
-		e = req.getParameter("etaTurn");
-		if(i != null && d != null && e != null){
-			PersistenceManager pm = PMF.get().getPersistenceManager();
-			GamePreferences prefs = new GamePreferences(
-					Integer.parseInt(i),
-					Integer.parseInt(d),
-					Integer.parseInt(e)
-					);
-			Game g = new Game(prefs);
-			resp.setContentType("text/plain");
-			resp.getWriter().println(
-					"Partida creada. Link invitación: " + g.getId());
-			if (g.addPlayer(user.getUserId(), user.getNickname(), 0)) {
-				pm.makePersistent(g);
-			}
-			pm.close();
-		} else {
-			// System.out.print("redireccionando al formulario de preferencias");
-			resp.sendRedirect("/preferences.jsp");
-		}
-		return;
-	}
-	
-	private void showGame(HttpServletRequest req, HttpServletResponse resp, String pid)
-			throws IOException {
-		Key k = KeyFactory.createKey(Game.class.getSimpleName(), pid);
-		PersistenceManager pm = PMF.get().getPersistenceManager();
-		Game game;
-		try {
-			game = pm.getObjectById(Game.class, k);
-			// System.out.print("partida recuperada del datastore: "+pid+"\n");
-			resp.setContentType("text/x-json");
-			resp.getWriter().println(game.toString());
-			return;
-		} catch (Exception e) {
-			// System.out.print("error recuperando partida del datastore: "+pid+"\n");
-			return;
-		}
-	}
-
-	private void sendJSONResponse(HttpServletRequest req, HttpServletResponse resp, boolean success){
-		JSONObject obj=new JSONObject();
-		obj.put("success", success);
-		resp.setContentType("text/x-json");
-		try {
-			resp.getWriter().println(obj.toJSONString());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return;
 	}
 }

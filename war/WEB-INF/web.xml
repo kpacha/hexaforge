@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xmlns="http://java.sun.com/xml/ns/javaee"
-xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
-http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
 	<servlet>
 		<servlet-name>TurnChecker</servlet-name>
 		<servlet-class>com.hexaforge.servlet.TurnChecker</servlet-class>
@@ -12,6 +12,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		<servlet-name>TurnChecker</servlet-name>
 		<url-pattern>/cron/return</url-pattern>
 	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>TurnWorker</servlet-name>
 		<servlet-class>com.hexaforge.servlet.TurnWorker</servlet-class>
@@ -20,6 +21,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		<servlet-name>TurnWorker</servlet-name>
 		<url-pattern>/worker/return</url-pattern>
 	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>Hexagame</servlet-name>
 		<servlet-class>com.hexaforge.servlet.HexagameServlet</servlet-class>
@@ -28,18 +30,48 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">
 		<servlet-name>Hexagame</servlet-name>
 		<url-pattern>/hexagame</url-pattern>
 	</servlet-mapping>
-	
-	<filter>
-        <filter-name>sitemesh</filter-name>
-        <filter-class>com.opensymphony.sitemesh.webapp.SiteMeshFilter</filter-class>
-    </filter>
 
-    <filter-mapping>
-        <filter-name>sitemesh</filter-name>
-        <url-pattern>/*</url-pattern>
-    </filter-mapping>
-	
-	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
-	</welcome-file-list>
+	<servlet>
+		<servlet-name>preferences</servlet-name>
+		<jsp-file>/preferences.jsp</jsp-file>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>preferences</servlet-name>
+		<url-pattern>/preferences</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>games</servlet-name>
+		<jsp-file>/games.jsp</jsp-file>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>games</servlet-name>
+		<url-pattern>/games</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>game</servlet-name>
+		<jsp-file>/game.jsp</jsp-file>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>game</servlet-name>
+		<url-pattern>/game</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>board</servlet-name>
+		<jsp-file>/board.jsp</jsp-file>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>board</servlet-name>
+		<url-pattern>/board</url-pattern>
+	</servlet-mapping>
+
+	<!-- <servlet> <servlet-name>FrontController</servlet-name> <servlet-class>com.hexaforge.servlet.FrontServlet</servlet-class> 
+		</servlet> <servlet-mapping> <servlet-name>FrontController</servlet-name> 
+		<url-pattern>/*</url-pattern> </servlet-mapping> -->
 </web-app>
