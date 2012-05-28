@@ -66,7 +66,7 @@ public class TurnWorker extends HttpServlet {
 			gameEntity.setNextCheck(game.getNextCheck());
 			gameEntity.setStatus(game.getStatus());
 
-			entityManager.persist(game);
+			entityManager.persist(gameEntity);
 		} catch (Exception e) {
 			LOGGER.warning("TurnWorker datastore writer error! "
 					+ e.getMessage());
