@@ -1,8 +1,7 @@
 package com.hexaforge.core.cell;
 
-import java.util.Random;
-
 import com.hexaforge.core.interfaces.CellInterface;
+import com.hexaforge.util.RandomGenerator;
 
 abstract public class Piece extends AbstractCell implements CellInterface {
 
@@ -33,16 +32,16 @@ abstract public class Piece extends AbstractCell implements CellInterface {
 		this.setY(y);
 		return true;
 	}
-	
-	public boolean attack(CellInterface target){
+
+	public boolean attack(CellInterface target) {
 		boolean success = false;
-		if(!target.getCode().isObstacle())
+		if (!target.getCode().isObstacle())
 			success = doAttack(target);
 		return success;
 	}
-	
-	protected boolean doAttack(CellInterface cell){
-		return new Random().nextBoolean();
+
+	protected boolean doAttack(CellInterface cell) {
+		return RandomGenerator.getInstance().nextBoolean();
 	}
 
 }

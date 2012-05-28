@@ -5,9 +5,9 @@ import java.util.Random;
 import com.hexaforge.core.cell.CellFactory;
 import com.hexaforge.core.cell.CellImplementationEnum;
 import com.hexaforge.core.interfaces.CellInterface;
+import com.hexaforge.util.RandomGenerator;
 
 public class Game extends AbstractGame {
-	private static Random randomGeneratorInstace;
 
 	public Game(GamePreferences gp) {
 		super(gp);
@@ -31,7 +31,7 @@ public class Game extends AbstractGame {
 	}
 
 	protected void insertNewRandomPiece(int playerId) {
-		Random generator = getRandomGenerator();
+		Random generator = RandomGenerator.getInstance();
 		int posX, posY;
 		char code;
 		CellInterface cell;
@@ -41,12 +41,6 @@ public class Game extends AbstractGame {
 			code = CellImplementationEnum.randomPiece(true).getCode();
 			cell = CellFactory.makeCell(code, posX, posY, playerId);
 		} while (!this.board.addCell(cell));
-	}
-
-	protected static synchronized Random getRandomGenerator() {
-		if (randomGeneratorInstace == null)
-			randomGeneratorInstace = new Random();
-		return randomGeneratorInstace;
 	}
 
 	protected boolean doMove(String userId, int fromX, int fromY, int toX,
