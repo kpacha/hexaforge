@@ -112,7 +112,7 @@ function createHexSpace(leftOffset, topOffset) {
     divTag.style.left = leftOffset + "px";
     divTag.style.top = topOffset + "px";
     divTag.className = "hexspace";
-    this.contenido = "";
+    this.code = "";
 
     divTag.insertar = function (piezacolor) {
         //subdiv.css("background-color",color_jugador[piezacolor.charAt(1)]);
@@ -173,7 +173,7 @@ function createHexSpace(leftOffset, topOffset) {
             if (valido) { //Es valido si esta iluminado de esperar
                 if (this.contiene() /*&& no es mi color*/ ) {
                     //Esto seria un ataque, moverse a una celda ocupada que no es de mi color
-                    intentarAtaque(this.id, active_div.id);
+                    intentarAtaque(active_div.id, this.id);
                 } else { //Esto seria un movimiento a casilla vacia
                     apagarTodo();
                     id_origen = active_div.id;
@@ -233,13 +233,18 @@ function enviarMovimiento(id_origen, id_destino) {
     tracear("mover: " + id_origen + " hacia " + id_destino + "<br>");
 	orig=$("#"+id_origen)[0];
 	dest=$("#"+id_destino)[0];
-	jsonMensaje='{"turno": "' + turno + '", "origen": {"x": '+orig.x+', "y": '+orig.y+'}, "destino": {"x": '+dest.x+', "y": '+dest.y+'}}';
+//	jsonMensaje='{"turn": ' + turno + ', "source": {"x": '+orig.x+', "y": '+orig.y+'}, "target": {"x": '+dest.x+', "y": '+dest.y+'}}';
 	$.post(
 		"hexagame",
 		{
-	        m: jsonMensaje,
+//	        m: jsonMensaje,
 	        aid: "move",
-	        pid: pid
+	        pid: pid,
+	        turn: turno,
+	        sx: orig.x,
+	        sy: orig.y,
+	        tx: dest.x,
+	        ty: dest.y
 		},
 		function (data) {
 			if (!data.success) {
@@ -301,15 +306,17 @@ function actualizarTablero() {
 }
 
 function montarMarcador(data){
-	pintaMarcador(data.turno, data.jugadores);
+	pintaMarcador(data.turn, data.players);
 //    for (x in data.jugadores) {
 //        //tracear('Nombre:'+data.jugadores[x].name+'<br>');
 //    };
 }
+
 function montarTablero(data) {
-    for (v in data.tablero.celdas) {
-        nombre = data.tablero.celdas[v].x + "-" + data.tablero.celdas[v].y
-        valor = data.tablero.celdas[v].contenido + data.tablero.celdas[v].propietario;
+	if(data.board && data.board.cell)
+    for (v in data.board.cell) {
+        nombre = data.board.cell[v].x + "-" + data.board.cell[v].y
+        valor = data.board.cell[v].code + data.board.cell[v].owner;
         positions[nombre] = valor;
         $("#hex" + nombre)[0].insertar(valor);
     }
