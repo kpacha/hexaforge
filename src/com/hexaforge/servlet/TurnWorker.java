@@ -2,9 +2,8 @@ package com.hexaforge.servlet;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.logging.Logger;
 
-import javax.jdo.PersistenceManager;
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +13,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.hexaforge.core.decorator.JsonDecorator;
 import com.hexaforge.core.interfaces.GameInterface;
 import com.hexaforge.entity.GameEntity;
-import com.hexaforge.util.PMF;
+import com.hexaforge.util.EMF;
 
 @SuppressWarnings("serial")
 public class TurnWorker extends HttpServlet {
@@ -31,20 +30,21 @@ public class TurnWorker extends HttpServlet {
 			return;
 		}
 		Key k = KeyFactory.createKey(GameEntity.class.getSimpleName(), id);
-		PersistenceManager pm = PMF.get().getPersistenceManager();
+		EntityManager entityManager = EMF.getEntityManager();
 		GameInterface game;
 		GameEntity gameEntity;
 		try {
-			gameEntity = pm.getObjectById(GameEntity.class, k);
-			game = JsonDecorator.getInstance().deserializeGame(gameEntity.getGame());
+			gameEntity = (GameEntity) entityManager.find(GameEntity.class, k);
+			game = JsonDecorator.getInstance().deserializeGame(
+					gameEntity.getGame());
 		} catch (Exception e) {
 			System.out.println("TurnWorker datastore reader error!");
 			return;
 		}
 		long now = (new Date()).getTime();
 		if (now < game.getNextCheck()) {
-			System.out.println("TurnWorker error: " + (game.getNextCheck() - now)
-					+ "ms. in advance!");
+			System.out.println("TurnWorker error: "
+					+ (game.getNextCheck() - now) + "ms. in advance!");
 			return;
 		}
 		if (game.addTurns(game.getPreferences().getDeltaTurn())) {
@@ -58,12 +58,10 @@ public class TurnWorker extends HttpServlet {
 			gameEntity.setGame(JsonDecorator.getInstance().serializeGame(game));
 			gameEntity.setNextCheck(game.getNextCheck());
 			gameEntity.setStatus(game.getStatus());
-			
-			pm.makePersistent(game);
+
+			entityManager.persist(game);
 		} catch (Exception e) {
 			System.out.println("TurnWorker datastore writer error!");
-			return;
 		}
-		pm.close();
 	}
 }
