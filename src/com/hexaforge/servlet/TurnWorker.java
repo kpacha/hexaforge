@@ -31,6 +31,7 @@ public class TurnWorker extends HttpServlet {
 			throws IOException {
 		String id = req.getParameter("id");
 		if (id == null) {
+			LOGGER.warning("TurnWorker has not received a game id!");
 			return;
 		}
 		Key gameEntityKey = KeyFactory.createKey(
@@ -38,38 +39,58 @@ public class TurnWorker extends HttpServlet {
 		EntityManager entityManager = EMF.getEntityManager();
 		GameInterface game;
 		GameEntity gameEntity;
+		JsonDecorator game2Json = JsonDecorator.getInstance();
 		try {
 			gameEntity = (GameEntity) entityManager.find(GameEntity.class,
 					gameEntityKey);
-			game = JsonDecorator.getInstance().deserializeGame(
-					gameEntity.getGame());
+			game = game2Json.deserializeGame(gameEntity.getGame());
+			LOGGER.info("TurnWorker has received the game from the datastore!");
 		} catch (Exception e) {
 			LOGGER.warning("TurnWorker datastore reader error! "
 					+ e.getMessage());
+			entityManager.close();
 			return;
 		}
+
 		long now = (new Date()).getTime();
+		LOGGER.info("Checking game --- Now: " + now + ". Next check: "
+				+ gameEntity.getNextCheck() + ". Diff: "
+				+ (now - gameEntity.getNextCheck()));
+
 		if (now < game.getNextCheck()) {
 			LOGGER.warning("TurnWorker error: " + (game.getNextCheck() - now)
 					+ "ms. in advance!");
+			entityManager.close();
 			return;
 		}
+
+		long nextCheck = game.getNextCheck();
 		if (game.addTurns(game.getPreferences().getDeltaTurn())) {
-			game.setNextCheck(game.getNextCheck()
-					+ game.getPreferences().getEtaTurn());
+			nextCheck += game.getPreferences().getEtaTurn();
+			game.setNextCheck(nextCheck);
+			LOGGER.info("Updating internal checking time --- Now: " + now
+					+ ". Next check: " + nextCheck + ". Diff: "
+					+ (now - nextCheck));
 		} else {
 			LOGGER.warning("TurnWorker unknown error!");
+			entityManager.close();
 			return;
 		}
+
 		try {
-			gameEntity.setGame(JsonDecorator.getInstance().serializeGame(game));
-			gameEntity.setNextCheck(game.getNextCheck());
+			gameEntity.setGame(game2Json.serializeGame(game));
+			gameEntity.setNextCheck(nextCheck);
 			gameEntity.setStatus(game.getStatus());
 
 			entityManager.persist(gameEntity);
+			LOGGER.info("Updating external checking time --- Now: " + now
+					+ ". Next check: " + gameEntity.getNextCheck() + ". Diff: "
+					+ (now - gameEntity.getNextCheck()));
 		} catch (Exception e) {
 			LOGGER.warning("TurnWorker datastore writer error! "
 					+ e.getMessage());
+		} finally {
+			entityManager.close();
 		}
 	}
 }
