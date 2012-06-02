@@ -15,99 +15,107 @@ import com.google.appengine.api.datastore.Text;
 
 @Entity
 public class GameEntity {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Key key;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Key key;
 
-	private String id;
+    private String id;
 
-	@Basic
-	private Text game;
-	
-	private long nextCheck;
-	
-	private int status;
+    @Basic
+    private Text game;
 
-	public GameEntity() {
-		long created = (new Date()).getTime();
-        CRC32 crc32 = new CRC32();
-        crc32.reset();
-        crc32.update((int) created);
-		this.id = Long.toString(created) + Long.toString(crc32.getValue());
-		this.key = KeyFactory.createKey(GameEntity.class.getSimpleName(), this.id);
-	}
+    private long nextCheck;
 
-	/**
-	 * @return the key
-	 */
-	public Key getKey() {
-		return key;
-	}
+    private int status;
 
-	/**
-	 * @return the game
-	 */
-	public String getGame() {
-		return game.getValue();
-	}
+    public GameEntity() {
+	long created = (new Date()).getTime();
+	CRC32 crc32 = new CRC32();
+	crc32.reset();
+	crc32.update((int) created);
+	setId(Long.toString(created) + Long.toString(crc32.getValue()));
+    }
 
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
+    public GameEntity(String pid, String game) {
+	setId(id);
+	setGame(game);
+    }
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+    /**
+     * @return the key
+     */
+    public Key getKey() {
+	return key;
+    }
 
-	/**
-	 * @param key
-	 *            the key to set
-	 */
-	public void setKey(Key key) {
-		this.key = key;
-	}
+    /**
+     * @return the game
+     */
+    public String getGame() {
+	return game.getValue();
+    }
 
-	/**
-	 * @param game
-	 *            the game to set
-	 */
-	public void setGame(String game) {
-		this.game = new Text(game);
-	}
+    /**
+     * @return the id
+     */
+    public String getId() {
+	return id;
+    }
 
-	/**
-	 * @return the nextCheck
-	 */
-	public long getNextCheck() {
-		return nextCheck;
-	}
+    /**
+     * @param id
+     *            the id to set
+     */
+    public void setId(String id) {
+	this.id = id;
+	this.key = KeyFactory.createKey(GameEntity.class.getSimpleName(),
+		this.id);
+    }
 
-	/**
-	 * @param nextCheck the nextCheck to set
-	 */
-	public void setNextCheck(long nextCheck) {
-		this.nextCheck = nextCheck;
-	}
+    /**
+     * @param key
+     *            the key to set
+     */
+    public void setKey(Key key) {
+	this.key = key;
+    }
 
-	/**
-	 * @return the status
-	 */
-	public int getStatus() {
-		return status;
-	}
+    /**
+     * @param game
+     *            the game to set
+     */
+    public void setGame(String game) {
+	this.game = new Text(game);
+    }
 
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(int status) {
-		this.status = status;
-	}
+    /**
+     * @return the nextCheck
+     */
+    public long getNextCheck() {
+	return nextCheck;
+    }
+
+    /**
+     * @param nextCheck
+     *            the nextCheck to set
+     */
+    public void setNextCheck(long nextCheck) {
+	this.nextCheck = nextCheck;
+    }
+
+    /**
+     * @return the status
+     */
+    public int getStatus() {
+	return status;
+    }
+
+    /**
+     * @param status
+     *            the status to set
+     */
+    public void setStatus(int status) {
+	this.status = status;
+    }
 
 }
