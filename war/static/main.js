@@ -7,6 +7,7 @@ var moviendo = false;
 var pieza_moviendo = "";
 var rango = 1; //La distancia que se puede mover.
 var turno = 0;
+var timeout;
 //rutas imagenes para piezas
 var clase_pieza = new Array();
 clase_pieza["r"] = "rock";
@@ -233,11 +234,9 @@ function enviarMovimiento(id_origen, id_destino) {
     tracear("mover: " + id_origen + " hacia " + id_destino + "<br>");
 	orig=$("#"+id_origen)[0];
 	dest=$("#"+id_destino)[0];
-//	jsonMensaje='{"turn": ' + turno + ', "source": {"x": '+orig.x+', "y": '+orig.y+'}, "target": {"x": '+dest.x+', "y": '+dest.y+'}}';
 	$.post(
 		"hexagame",
 		{
-//	        m: jsonMensaje,
 	        aid: "move",
 	        pid: pid,
 	        turn: turno,
@@ -248,16 +247,13 @@ function enviarMovimiento(id_origen, id_destino) {
 		},
 		function (data) {
 			if (!data.success) {
-				tracear("Error: no se ha podido procesar el movimiento<br>");
+				tracear("<p>Error: " + data.message + "</p>");
+				data = null;
 	        }
-			actualizarTablero();
+			actualizarTablero(data, false);
 		}
 	);
     return null;
-}
-
-function enviar() {
-
 }
 
 function apagarTodo() {
@@ -282,27 +278,24 @@ function getUrlVars() {
 	return vars;
 }
 
-function insertarTablero() {
-	url="hexagame?pid="+pid;
-    $.getJSON(url, function (data) {
-    	turno = data.turno;
-    	montarMarcador(data)
-    	montarTablero(data)
-    }).error(function () {
-        tracear("error, estás logueado?")
-    });
-}
-
-function actualizarTablero() {
-	url="hexagame?pid="+pid;
-    $.getJSON(url, function (data) {
-    	turno = data.turno;
+function actualizarTablero(dataLoaded, isNew) {
+	if(dataLoaded!=null && dataLoaded!=undefined){
+		turno = dataLoaded.turn;
     	vaciarTablero();
-        montarTablero(data);
-        montarMarcador(data);
-    }).error(function () {
-        tracear("error, estás logueado?")
-    });
+        montarTablero(dataLoaded);
+        montarMarcador(dataLoaded);
+	}else{
+		url="hexagame?pid="+pid;
+	    $.getJSON(url, function (data) {
+	    	turno = data.turn;
+	    	if(!isNew)
+	    		vaciarTablero();
+	        montarTablero(data);
+	        montarMarcador(data);
+	    }).error(function () {
+	        tracear("error, estás logueado?")
+	    });
+	}
 }
 
 function montarMarcador(data){
@@ -313,13 +306,15 @@ function montarMarcador(data){
 }
 
 function montarTablero(data) {
-	if(data.board && data.board.cell)
-    for (v in data.board.cell) {
-        nombre = data.board.cell[v].x + "-" + data.board.cell[v].y
-        valor = data.board.cell[v].code + data.board.cell[v].owner;
-        positions[nombre] = valor;
-        $("#hex" + nombre)[0].insertar(valor);
-    }
+	if(data.board && data.board.cell){
+	    for (v in data.board.cell) {
+	        nombre = data.board.cell[v].x + "-" + data.board.cell[v].y
+	        valor = data.board.cell[v].code + data.board.cell[v].owner;
+	        positions[nombre] = valor;
+	        $("#hex" + nombre)[0].insertar(valor);
+	    }
+		timeout=setTimeout("actualizarTablero(null, false)", 60000);
+	}
 }
 
 function getPlayer() {
@@ -380,5 +375,5 @@ function () {
 	if(pid==undefined) pid="13101446764654110462503";
 	tracear("partida: "+pid+"<br>");
     iniciarTablero(); //pero en vacio
-    insertarTablero(); //recuperar json partida y rellenar las celdas
+    actualizarTablero(null, true); //recuperar json partida y rellenar las celdas
 });
