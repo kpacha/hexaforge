@@ -1,6 +1,6 @@
 package com.hexaforge.core.cell;
 
-import com.hexaforge.controller.MovementException;
+import com.hexaforge.command.exception.MovementException;
 import com.hexaforge.core.interfaces.CellInterface;
 import com.hexaforge.util.RandomGenerator;
 

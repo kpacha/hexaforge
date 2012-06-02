@@ -1,6 +1,6 @@
 package com.hexaforge.core.interfaces;
 
-import com.hexaforge.controller.MovementException;
+import com.hexaforge.command.exception.MovementException;
 import com.hexaforge.core.cell.CellImplementationEnum;
 
 public interface CellInterface {

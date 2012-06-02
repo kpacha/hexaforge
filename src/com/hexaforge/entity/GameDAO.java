@@ -28,13 +28,15 @@ public class GameDAO {
 	    throws MemcacheConnectorException, CacheException {
 	if (isLoadedFromMemcache)
 	    gameEntity = loadFromDatabase(gameEntity.getId());
-	gameEntity.setGame(game2Json.serializeGame(game));
+
+	String serializedGame = game2Json.serializeGame(game);
+	gameEntity.setGame(serializedGame);
 	gameEntity.setNextCheck(game.getNextCheck());
 	gameEntity.setStatus(game.getStatus());
 	entityManager.persist(gameEntity);
 	entityManager.close();
 	MemcacheConnector memcache = new MemcacheConnector();
-	memcache.put(gameEntity.getId(), game2Json.serializeGame(game));
+	memcache.put(gameEntity.getId(), serializedGame);
 	return true;
     }
 
@@ -76,7 +78,6 @@ public class GameDAO {
 		.createQuery("SELECT game FROM GameEntity game WHERE game.nextCheck <= :nextCheck AND game.status = 3");
 	queryGamesToCheck.setParameter("nextCheck", now);
 	List<GameEntity> games = queryGamesToCheck.getResultList();
-	entityManager.close();
 	return games;
     }
 }
