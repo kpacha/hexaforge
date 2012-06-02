@@ -1,5 +1,7 @@
 package com.hexaforge.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -38,6 +40,17 @@ public class GameController {
 	return gameEntity.getGame();
     }
 
+    public List<String> getGameIdsToCheck(long now) {
+	@SuppressWarnings("unchecked")
+	List<GameEntity> games = gameDAO.getGamesToCheck(now);
+	List<String> gameIds = new ArrayList<String>();
+	for (GameEntity game : games) {
+	    if (now - game.getNextCheck() >= 0)
+		gameIds.add(game.getId());
+	}
+	return gameIds;
+    }
+
     public boolean doAction(String action, User user,
 	    Map<String, String[]> parameterMap) throws Exception {
 	boolean success = false;
@@ -65,6 +78,19 @@ public class GameController {
 	    throw e;
 	}
 	return success;
+    }
+
+    public void updateTurns(long now) throws Exception {
+	GameInterface game = game2Json.deserializeGame(gameEntity.getGame());
+	if (game.getNextCheck() > now)
+	    throw new Exception(
+		    "Can not update turns before the nextCheck time! Wait "
+			    + ((game.getNextCheck() - now) / 1000) + "sec.");
+	if (game.addTurns(game.getPreferences().getDeltaTurn())) {
+	    game.setNextCheck(game.getNextCheck()
+		    + game.getPreferences().getEtaTurn());
+	}
+	gameDAO.persist(game, gameEntity);
     }
 
     protected GameInterface newGame(Map<String, String[]> parameters, User user)

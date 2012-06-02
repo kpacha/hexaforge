@@ -1,7 +1,10 @@
 package com.hexaforge.entity;
 
+import java.util.List;
+
 import javax.cache.CacheException;
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
 import com.google.appengine.api.datastore.KeyFactory;
 import com.hexaforge.core.decorator.JsonDecorator;
@@ -65,5 +68,15 @@ public class GameDAO {
     private GameEntity loadFromDatabase(String pid) {
 	return entityManager.find(GameEntity.class,
 		KeyFactory.createKey(GameEntity.class.getSimpleName(), pid));
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<GameEntity> getGamesToCheck(long now) {
+	Query queryGamesToCheck = entityManager
+		.createQuery("SELECT game FROM GameEntity game WHERE game.nextCheck <= :nextCheck AND game.status = 3");
+	queryGamesToCheck.setParameter("nextCheck", now);
+	List<GameEntity> games = queryGamesToCheck.getResultList();
+	entityManager.close();
+	return games;
     }
 }
