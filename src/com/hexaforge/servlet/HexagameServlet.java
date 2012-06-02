@@ -10,6 +10,8 @@ import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.hexaforge.controller.GameController;
+import com.hexaforge.core.ExceptionMessage;
+import com.hexaforge.core.decorator.JsonDecorator;
 import com.hexaforge.util.EMF;
 
 public class HexagameServlet extends HttpServlet {
@@ -26,18 +28,20 @@ public class HexagameServlet extends HttpServlet {
 	    return;
 	}
 	String pid = req.getParameter("pid");
-
-	GameController controller;
+	String serializedResponse = null;
 	try {
-	    controller = new GameController(EMF.getEntityManager());
+	    GameController controller = new GameController(
+		    EMF.getEntityManager());
 	    user = checkUser(req, resp);
 	    controller.setGameEntity(pid);
-	    controller.doAction(action, user, req.getParameterMap());
-	    resp.getWriter().println(controller.getSerializedGame());
+	    serializedResponse = controller.doAction(action, user,
+		    req.getParameterMap());
 	} catch (Exception e) {
-	    System.out.println("doPost Error: " + e.getMessage());
-	    resp.getWriter().println(e.getMessage());
+	    JsonDecorator gson = JsonDecorator.getInstance();
+	    serializedResponse = gson.serializeException(new ExceptionMessage(e
+		    .getMessage()));
 	}
+	returnJson(serializedResponse, resp);
     }
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -47,16 +51,18 @@ public class HexagameServlet extends HttpServlet {
 	    System.out.println("Ending incomplete request");
 	    return;
 	}
-	GameController controller;
+	String serializedResponse = null;
 	try {
-	    controller = new GameController(EMF.getEntityManager());
+	    GameController controller = new GameController(
+		    EMF.getEntityManager());
 	    controller.setGameEntity(pid);
-	    String serializedGame = controller.getSerializedGame();
-	    resp.getWriter().println(serializedGame);
+	    serializedResponse = controller.getSerializedGame();
 	} catch (Exception e) {
-	    System.out.println("doGet Error: " + e.getMessage());
-	    e.printStackTrace();
+	    JsonDecorator gson = JsonDecorator.getInstance();
+	    serializedResponse = gson.serializeException(new ExceptionMessage(e
+		    .getMessage()));
 	}
+	returnJson(serializedResponse, resp);
     }
 
     private User checkUser(HttpServletRequest req, HttpServletResponse resp)
@@ -66,5 +72,11 @@ public class HexagameServlet extends HttpServlet {
 	if (user == null)
 	    throw new Exception("Client is not logged in");
 	return user;
+    }
+
+    private void returnJson(String serializedResponse, HttpServletResponse resp)
+	    throws IOException {
+	resp.setContentType("text/x-json");
+	resp.getWriter().println(serializedResponse);
     }
 }
