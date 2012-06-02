@@ -36,7 +36,7 @@ abstract public class Piece extends AbstractCell implements CellInterface {
 
     public boolean attack(CellInterface target) throws MovementException {
 	boolean success = false;
-	if (target.getOwner() != owner)
+	if (target.getOwner() == owner)
 	    throw new MovementException();
 	if (!target.getCode().isObstacle())
 	    success = doAttack(target);
