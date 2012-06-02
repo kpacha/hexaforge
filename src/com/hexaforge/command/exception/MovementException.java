@@ -1,4 +1,4 @@
-package com.hexaforge.controller;
+package com.hexaforge.command.exception;
 
 public class MovementException extends Exception {
 

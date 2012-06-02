@@ -1,7 +1,8 @@
 package com.hexaforge.servlet;
 
 import java.io.IOException;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -22,18 +23,22 @@ public class TurnWorker extends HttpServlet {
 	doPost(req, resp);
     }
 
+    @SuppressWarnings("unchecked")
     public void doPost(HttpServletRequest req, HttpServletResponse resp)
 	    throws IOException {
-	String id = req.getParameter("id");
+	String id = req.getParameter("pid");
 	if (id == null) {
 	    LOGGER.warning("TurnWorker has not received a game id!");
 	    return;
 	}
 	try {
+	    Map<String, String[]> parameterMap = new HashMap<String, String[]>();
+	    parameterMap.putAll(req.getParameterMap());
+	    String[] aid = { "updateTurns" };
+	    parameterMap.put("aid", aid);
 	    GameController controller = new GameController(
-		    EMF.getEntityManager());
-	    controller.setGameEntity(id);
-	    controller.updateTurns((new Date()).getTime());
+		    EMF.getEntityManager(), parameterMap);
+	    controller.doAction(null);
 	    LOGGER.warning("TurnWorker game [" + id + "] updated!");
 	} catch (Exception e) {
 	    LOGGER.warning("TurnWorker gets an error! " + e.getMessage());

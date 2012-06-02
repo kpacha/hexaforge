@@ -1,6 +1,8 @@
 package com.hexaforge.servlet;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,11 +33,9 @@ public class HexagameServlet extends HttpServlet {
 	String serializedResponse = null;
 	try {
 	    GameController controller = new GameController(
-		    EMF.getEntityManager());
+		    EMF.getEntityManager(), req.getParameterMap());
 	    user = checkUser(req, resp);
-	    controller.setGameEntity(pid);
-	    serializedResponse = controller.doAction(action, user,
-		    req.getParameterMap());
+	    serializedResponse = controller.doAction(user);
 	} catch (Exception e) {
 	    JsonDecorator gson = JsonDecorator.getInstance();
 	    serializedResponse = gson.serializeException(new ExceptionMessage(e
@@ -53,10 +53,13 @@ public class HexagameServlet extends HttpServlet {
 	}
 	String serializedResponse = null;
 	try {
+	    Map<String, String[]> parameterMap = new HashMap<String, String[]>();
+	    parameterMap.putAll(req.getParameterMap());
+	    String[] aid = { "view" };
+	    parameterMap.put("aid", aid);
 	    GameController controller = new GameController(
-		    EMF.getEntityManager());
-	    controller.setGameEntity(pid);
-	    serializedResponse = controller.getSerializedGame();
+		    EMF.getEntityManager(), parameterMap);
+	    serializedResponse = controller.doAction(null);
 	} catch (Exception e) {
 	    JsonDecorator gson = JsonDecorator.getInstance();
 	    serializedResponse = gson.serializeException(new ExceptionMessage(e
