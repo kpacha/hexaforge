@@ -1,5 +1,6 @@
 package com.hexaforge.core.cell;
 
+import com.hexaforge.controller.MovementException;
 import com.hexaforge.core.interfaces.CellInterface;
 import com.hexaforge.util.RandomGenerator;
 
@@ -33,9 +34,11 @@ abstract public class Piece extends AbstractCell implements CellInterface {
 	return true;
     }
 
-    public boolean attack(CellInterface target) {
+    public boolean attack(CellInterface target) throws MovementException {
 	boolean success = false;
-	if (!target.getCode().isObstacle() && target.getOwner() != owner)
+	if (target.getOwner() != owner)
+	    throw new MovementException();
+	if (!target.getCode().isObstacle())
 	    success = doAttack(target);
 	return success;
     }

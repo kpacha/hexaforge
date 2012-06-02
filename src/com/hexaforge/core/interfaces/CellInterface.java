@@ -1,26 +1,27 @@
 package com.hexaforge.core.interfaces;
 
+import com.hexaforge.controller.MovementException;
 import com.hexaforge.core.cell.CellImplementationEnum;
 
 public interface CellInterface {
 
-	public boolean move(int x, int y);
+    public boolean move(int x, int y);
 
-	public int getX();
+    public int getX();
 
-	public int getY();
+    public int getY();
 
-	public int getOwner();
+    public int getOwner();
 
-	public int getRange();
+    public int getRange();
 
-	public void setX(int x);
+    public void setX(int x);
 
-	public void setY(int y);
+    public void setY(int y);
 
-	public void setOwner(int owner);
-	
-	public CellImplementationEnum getCode();
+    public void setOwner(int owner);
 
-	public boolean attack(CellInterface cell);
+    public CellImplementationEnum getCode();
+
+    public boolean attack(CellInterface cell) throws MovementException;
 }
