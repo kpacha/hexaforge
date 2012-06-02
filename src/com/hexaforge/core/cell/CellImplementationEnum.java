@@ -8,7 +8,7 @@ import java.util.Random;
 import com.hexaforge.util.RandomGenerator;
 
 public enum CellImplementationEnum {
-    SCISSOR('t'), PAPER('p'), ROCK('r'), LIZZARD('l'), SPOK('s'), OBSTACLE('o');
+    SCISSOR('t'), PAPER('p'), ROCK('r'), LIZZARD('l'), SPOCK('s'), OBSTACLE('o');
 
     private char code;
 
