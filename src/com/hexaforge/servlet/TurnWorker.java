@@ -15,7 +15,7 @@ import com.hexaforge.util.EMF;
 @SuppressWarnings("serial")
 public class TurnWorker extends HttpServlet {
 
-    private static final Logger LOGGER = Logger.getLogger(TurnChecker.class
+    private static final Logger LOGGER = Logger.getLogger(TurnWorker.class
 	    .getName());
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp)
